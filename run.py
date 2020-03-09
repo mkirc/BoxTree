@@ -33,7 +33,7 @@ class TreeController():
 
 def run():
 
-	depth = 2
+	depth = 3
 	divCrit = 0.6
 	startAxis = 0
 

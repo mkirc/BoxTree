@@ -18,24 +18,25 @@ class kdTree():
 
 	def grow(self):
 
-		for d in range(self.maxDepth + 1):
-				print(d)
-				self.root.split(d, self.axis, self.divCrit)
-				self.evaluate()
+		self.root.split(self.maxDepth, self.axis, self.divCrit)
+		self.evaluate()
 
-				self.axis = (self.axis + 1) % 3
 
-		else:
-			self.getLeaves()
-			# print(str(self.curDepth))
-			# print('last Axis: %s' % self.axis)
-			print('finished.')
+		self.getLeaves()
+			
+
+		# print(str(self.curDepth))
+		# print('last Axis: %s' % self.axis)
+		print('finished.')
 
 
 	def evaluate(self):
 		pass
 
 	def getLeaves(self):
+
+		for l in self.root.getLeaves():
+			self.leaves.append(l)
 
 
 		
@@ -67,11 +68,11 @@ class Node():
 
 		
 		if self.isLeaf:
-			print('leave')
-			return self
+			# print('leave')
+			yield self
 		else:
-			self.rightChild.getLeaves()
-			self.leftChild.getLeaves()	
+			yield from self.rightChild.getLeaves()
+			yield from self.leftChild.getLeaves()	
 
 
 	def split(self, depth, axis, divCrit):
@@ -88,11 +89,13 @@ class Node():
 					else:
 						self.rightChild.points.append(point)
 				depth = depth - 1
+				axis = (axis + 1) % 3
 				self.leftChild.split((depth), axis, divCrit)
-				self.leftChild.split((depth), axis, divCrit)
+				self.rightChild.split((depth), axis, divCrit)
 		else:
 			depth = depth - 1
+			axis = (axis + 1) % 3
 			self.leftChild.split((depth), axis, divCrit)
-			self.leftChild.split((depth), axis, divCrit)	
+			self.rightChild.split((depth), axis, divCrit)	
 
 
