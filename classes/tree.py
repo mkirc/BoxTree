@@ -5,6 +5,8 @@ import math
 
 class kdTree():
 
+	TREE_INFO = []
+
 	def __init__(self, depth, divCrit, startAxis):
 
 		self.curDepth = 0
@@ -25,11 +27,8 @@ class kdTree():
 
 
 		self.getLeaves()
-			
 
-		# print(str(self.curDepth))
-		# print('last Axis: %s' % self.axis)
-		print('finished.')
+		print('finished tree groth.')
 
 
 	def evaluate(self):
@@ -44,6 +43,25 @@ class kdTree():
 
 		self.root.postOrderWalk()
 
+	def breathFirstWalk(self):
+
+		root = self.root
+		toVisit = [root]
+		NODE_ID = 1
+		while toVisit:
+			cur = toVisit.pop(0)
+			
+			kdTree.TREE_INFO.append((cur.id, len(cur.points)))
+			if cur.leftChild:
+				NODE_ID += 1
+				cur.leftChild.id = NODE_ID
+				toVisit.append(cur.leftChild)
+			if cur.rightChild:
+				NODE_ID += 1
+				cur.rightChild.id = NODE_ID
+				toVisit.append(cur.rightChild)
+
+
 
 		
 
@@ -51,12 +69,11 @@ class kdTree():
 
 class Node():
 
-	NODE_ID = 1
-	NODE_INFO = []
+
 
 	def __init__(self, parent):
 
-		self.id = Node.NODE_ID
+		self.id = 1
 		self.depth = 0
 		self.isLeaf = True
 		self.leftChild = None
@@ -64,7 +81,7 @@ class Node():
 		self.parent = parent
 		self.points = []
 
-		Node.NODE_ID += 1
+		# Node.NODE_ID += 1
 
 
 	def getMax(self, axis):
@@ -83,15 +100,7 @@ class Node():
 		else:
 			yield from self.rightChild.getLeaves()
 			yield from self.leftChild.getLeaves()	
-
-	def postOrderWalk(self):
-
-		if self.leftChild:
-			self.leftChild.postOrderWalk()
-		if self.rightChild:
-			self.rightChild.postOrderWalk()
-
-		Node.NODE_INFO.append((self.id, len(self.points)))
+		
 
 	def split(self, depth, axis, divCrit):
 
@@ -100,29 +109,32 @@ class Node():
 				self.leftChild = Node(self)
 				self.rightChild = Node(self)
 				self.isLeaf = False
+				self.leftChild.depth += 1
+				self.rightChild.depth += 1
 				try:
 					divisor = divCrit * self.getMax(axis)
 				except ValueError:
 					# enter smart error handling here
-					# probably this only happens when the 
-					# divisor gets too small
-					# print(depth)
-					pass
-				finally:
-					for point in self.points:
-						if point.dim[axis] <= divisor:
-							self.leftChild.points.append(point)
-						else:
-							self.rightChild.points.append(point)
-					
-					depth = depth - 1
-					axis = (axis + 1) % 3
-					self.leftChild.split((depth), axis, divCrit)
-					self.rightChild.split((depth), axis, divCrit)
-		else:
-			depth = depth - 1
-			axis = (axis + 1) % 3
-			self.leftChild.split((depth), axis, divCrit)
-			self.rightChild.split((depth), axis, divCrit)	
+					# only happens when the leaf of interest is empty
+					divisor = 0
+
+				for point in self.points:
+					if point.dim[axis] < divisor:
+						self.leftChild.points.append(point)
+					else:
+						self.rightChild.points.append(point)
+				
+				depth = depth - 1
+				axis = (axis + 1) % 3
+				
+
+				self.leftChild.split((depth), axis, divCrit)
+				self.rightChild.split((depth), axis, divCrit)
+
+		# else:
+		# 	depth = depth - 1
+		# 	axis = (axis + 1) % 3
+		# 	self.leftChild.split((depth), axis, divCrit)
+		# 	self.rightChild.split((depth), axis, divCrit)	
 
 
