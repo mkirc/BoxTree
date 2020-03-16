@@ -113,7 +113,6 @@ class Node():
 	def calculateDeltaV(self):
 
 		# look at the README for explanation
-		print((self.parent.dim))
 		self.deltaV = len(self.points) * (self.parent.vol - self.vol)
 
 	def split(self, depth, axis, divCrit):

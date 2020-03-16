@@ -33,6 +33,9 @@ class TreeController():
 
 		deltaVs.sort(key=lambda tup:tup[0], reverse=True)
 
+		if bestN:
+			return deltaVs[0:bestN]
+
 		return deltaVs
 
 	def printInfo(self, numPoints, extended=False):
@@ -64,7 +67,7 @@ class TreeController():
 
 def run():
 
-	depth = 2
+	depth = 10
 	divCrit = 0.5
 	startAxis = 0
 	numPoints = 47000
@@ -80,9 +83,9 @@ def run():
 	# t.tree.postOrderWalk()
 	t.tree.breathFirstWalk()
 
-	t.printInfo(numPoints, extended=True)
+	t.printInfo(numPoints)
 
-	for v in t.getDeltaVs():
+	for v in t.getDeltaVs(bestN=3):
 		print(v)
 
 
