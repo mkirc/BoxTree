@@ -1,5 +1,6 @@
 import numpy
 import math
+import copy
 
 
 
@@ -137,11 +138,14 @@ class Node():
 					else:
 						self.rightChild.points.append(point)
 				
-				self.leftChild.dim = self.dim
+				
+				# self.leftChild.dim = copy.deepcopy(self.dim)
+				self.leftChild.dim = [i for i in self.dim]
 				self.leftChild.dim[axis] = divisor
 				self.leftChild.calculateVolume()
 				self.leftChild.calculateDeltaV()
-				self.rightChild.dim = self.dim
+				# self.rightChild.dim = copy.deepcopy(self.dim)
+				self.rightChild.dim = [i for i in self.dim]
 				self.rightChild.calculateVolume()
 				self.rightChild.deltaV = self.deltaV
 

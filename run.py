@@ -29,7 +29,7 @@ class TreeController():
 
 		deltaVs = []
 		for node in self.tree.leaves:
-			deltaVs.append((node.deltaV, node.id))
+			deltaVs.append((node.deltaV, node))
 
 		deltaVs.sort(key=lambda tup:tup[0], reverse=True)
 
@@ -38,7 +38,19 @@ class TreeController():
 
 		return deltaVs
 
-	def printInfo(self, numPoints, extended=False, bestN=None):
+	def isNumPointsConst(self):
+
+		allPoints = []
+
+		for node in self.tree.leaves:
+
+			allPoints += node.points
+
+		assert len(allPoints) == len(self.tree.root.points)
+		print('✔ No points lost!')
+		print('')		
+
+	def printInfo(self, numPoints, extended=False, bestN=False):
 
 		print('Number of Points:			%.2e' % numPoints)
 		print('initial total Volume:		%.4e' % self.initialTotalVolume)
@@ -62,10 +74,15 @@ class TreeController():
 
 		if bestN:
 
-			print('Most valuable %i Points:' % (bestN))
+			count = []
+			for mvp in self.getDeltaVs():
+				dV, n = mvp
+				count.append(mvp)
+				if dV == 0:
+					break
 
-			for mvp in self.getDeltaVs(bestN=bestN):
-				print(mvp)
+			print(' Leaves with deltaV gain:	%i' % (len(count)))
+
 
 
 
@@ -75,7 +92,7 @@ class TreeController():
 
 def run():
 
-	depth = 10
+	depth = 13
 	divCrit = 0.5
 	startAxis = 0
 	numPoints = 47000
@@ -88,10 +105,13 @@ def run():
 
 
 	t.tree.grow()
-	# t.tree.postOrderWalk()
-	t.tree.breathFirstWalk()
 
-	t.printInfo(numPoints, bestN=3)
+	t.tree.breathFirstWalk()
+	
+	# sanity check	
+	t.isNumPointsConst()
+
+	t.printInfo(numPoints, bestN=100)
 
 
 run()
