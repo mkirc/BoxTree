@@ -38,7 +38,7 @@ class TreeController():
 
 		return deltaVs
 
-	def printInfo(self, numPoints, extended=False):
+	def printInfo(self, numPoints, extended=False, bestN=None):
 
 		print('Number of Points:			%.2e' % numPoints)
 		print('initial total Volume:		%.4e' % self.initialTotalVolume)
@@ -59,6 +59,14 @@ class TreeController():
 				else:
 					print(n[0],n[1] , " ", end = '')
 			print('')
+
+		if bestN:
+
+			print('Most valuable %i Points:' % (bestN))
+
+			for mvp in self.getDeltaVs(bestN=bestN):
+				print(mvp)
+
 
 
 		
@@ -83,10 +91,7 @@ def run():
 	# t.tree.postOrderWalk()
 	t.tree.breathFirstWalk()
 
-	t.printInfo(numPoints)
-
-	for v in t.getDeltaVs(bestN=3):
-		print(v)
+	t.printInfo(numPoints, bestN=3)
 
 
 run()
