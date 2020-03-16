@@ -14,6 +14,8 @@ class kdTree():
 		self.axis = startAxis
 		self.divCrit = divCrit
 		self.root = Node(None)
+		self.root.dim = [2000, 800, 800]
+		self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
 		self.leaves = []
 
 	def insert(self, points):
@@ -80,6 +82,9 @@ class Node():
 		self.rightChild = None
 		self.parent = parent
 		self.points = []
+		self.dim = []
+		self.vol = None
+		self.deltaV = 0
 
 		# Node.NODE_ID += 1
 
@@ -100,7 +105,16 @@ class Node():
 		else:
 			yield from self.rightChild.getLeaves()
 			yield from self.leftChild.getLeaves()	
-		
+
+	def calculateVolume(self):
+
+		self.vol = self.dim[0] * self.dim[1] * self.dim[2]
+	
+	def calculateDeltaV(self):
+
+		# look at the README for explanation
+		print((self.parent.dim))
+		self.deltaV = len(self.points) * (self.parent.vol - self.vol)
 
 	def split(self, depth, axis, divCrit):
 
@@ -124,6 +138,14 @@ class Node():
 					else:
 						self.rightChild.points.append(point)
 				
+				self.leftChild.dim = self.dim
+				self.leftChild.dim[axis] = divisor
+				self.leftChild.calculateVolume()
+				self.leftChild.calculateDeltaV()
+				self.rightChild.dim = self.dim
+				self.rightChild.calculateVolume()
+				self.rightChild.deltaV = self.deltaV
+
 				depth = depth - 1
 				axis = (axis + 1) % 3
 				
@@ -136,5 +158,8 @@ class Node():
 		# 	axis = (axis + 1) % 3
 		# 	self.leftChild.split((depth), axis, divCrit)
 		# 	self.rightChild.split((depth), axis, divCrit)	
+
+ 
+
 
 

@@ -25,6 +25,16 @@ class TreeController():
 		self.initialTotalVolume = np.sum(self.itemBoxes[:][0]).vol
 		self.initialTotalDeadVolume =  self.initialTotalVolume - np.sum(self.itemBoxes[:][1]).vol
 
+	def getDeltaVs(self, bestN=None):
+
+		deltaVs = []
+		for node in self.tree.leaves:
+			deltaVs.append((node.deltaV, node.id))
+
+		deltaVs.sort(key=lambda tup:tup[0], reverse=True)
+
+		return deltaVs
+
 	def printInfo(self, numPoints, extended=False):
 
 		print('Number of Points:			%.2e' % numPoints)
@@ -54,7 +64,7 @@ class TreeController():
 
 def run():
 
-	depth = 6
+	depth = 2
 	divCrit = 0.5
 	startAxis = 0
 	numPoints = 47000
@@ -63,7 +73,6 @@ def run():
 	t.getInitialValues()
 	t.initializeTree(depth, divCrit, startAxis)
 	p = [i[0] for i in t.itemBoxes]
-	# print([i.dim[1] for i in p[0:10]])
 	t.tree.insert(p[0:numPoints])
 
 
@@ -71,7 +80,10 @@ def run():
 	# t.tree.postOrderWalk()
 	t.tree.breathFirstWalk()
 
-	t.printInfo(numPoints)
+	t.printInfo(numPoints, extended=True)
+
+	for v in t.getDeltaVs():
+		print(v)
 
 
 run()
