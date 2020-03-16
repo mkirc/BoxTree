@@ -15,6 +15,7 @@ class TreeController():
 		self.pf.loadPoints(path)
 		self.itemBoxes = self.pf.getItemBoxes()
 		self.tree = None
+		self.bestNodes = []
 
 	def initializeTree(self, d, c, s):
 
@@ -23,7 +24,8 @@ class TreeController():
 	def getInitialValues(self):
 
 		self.initialTotalVolume = np.sum(self.itemBoxes[:][0]).vol
-		self.initialTotalDeadVolume =  self.initialTotalVolume - np.sum(self.itemBoxes[:][1]).vol
+		self.initialTotalDeadVolume =  (self.initialTotalVolume
+										- np.sum(self.itemBoxes[:][1]).vol)
 
 	def getDeltaVs(self, bestN=None):
 
@@ -38,6 +40,16 @@ class TreeController():
 
 		return deltaVs
 
+	def getBestNodes(self):
+		
+		for mvp in self.getDeltaVs():
+			dV, n = mvp
+			self.bestNodes.append((n, dV))
+			if dV == 0:
+				break
+		return
+
+
 	def isNumPointsConst(self):
 
 		allPoints = []
@@ -47,15 +59,17 @@ class TreeController():
 			allPoints += node.points
 
 		assert len(allPoints) == len(self.tree.root.points)
-		print('✔ No points lost!')
-		print('')		
+		print('✔ no points lost!')
+		print('')
+		return
+
 
 	def printInfo(self, numPoints, extended=False, bestN=False):
 
-		print('Number of Points:			%.2e' % numPoints)
-		print('initial total Volume:		%.4e' % self.initialTotalVolume)
-		print('initial total DeadVolume:	%.4e' % self.initialTotalDeadVolume)
-		print('Number of Leaves:			%s' % len(self.tree.leaves))
+		print('Number of Points:\t\t\t%.2e' % numPoints)
+		print('initial total Volume:\t\t%.4e' % self.initialTotalVolume)
+		print('initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
+		print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
 		
 		if extended:
 
@@ -74,14 +88,7 @@ class TreeController():
 
 		if bestN:
 
-			count = []
-			for mvp in self.getDeltaVs():
-				dV, n = mvp
-				count.append(mvp)
-				if dV == 0:
-					break
-
-			print(' Leaves with deltaV gain:	%i' % (len(count)))
+			print(' Leaves with deltaV gain:	%i' % (len(self.bestNodes)))
 
 
 
@@ -105,13 +112,13 @@ def run():
 
 
 	t.tree.grow()
-
 	t.tree.breathFirstWalk()
-	
 	# sanity check	
 	t.isNumPointsConst()
 
-	t.printInfo(numPoints, bestN=100)
+	t.getBestNodes()
+
+	t.printInfo(numPoints, bestN=True)
 
 
 run()

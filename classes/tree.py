@@ -31,7 +31,7 @@ class kdTree():
 
 		self.getLeaves()
 
-		print('finished tree groth.')
+		print('✔ finished tree groth.')
 
 
 	def evaluate(self):
