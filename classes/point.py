@@ -28,14 +28,15 @@ class PointFactory():
 	def __init__(self):
 		
 		self.itemBoxes = []
+		self.newItemBoxes = []
 
-	def loadPoints(self, path):
+	def loadPoints(self, path, new=False):
 
 		with open(path) as openFile:
 			for line in openFile:
-				self.parse(line)
+				self.parse(line, new)
 
-	def parse(self, line):
+	def parse(self, line, new=False):
 
 		line = [i.strip() for i in line.split(',')]
 
@@ -47,8 +48,15 @@ class PointFactory():
 		bb = Point([bbdim[2], bbdim[1], bbdim[0]])
 		box = Point([int(line[1]), int(line[2]), int(line[3])])
 
-		self.itemBoxes.append([bb, box])
+		if new:
+			self.newItemBoxes.append([bb, box])
+		else:
+			self.itemBoxes.append([bb, box])
 
 	def getItemBoxes(self):
 
 		return self.itemBoxes
+
+	def getNewItemBoxes(self):
+
+		return self.newItemBoxes

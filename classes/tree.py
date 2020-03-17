@@ -15,7 +15,7 @@ class kdTree():
 		self.axis = startAxis
 		self.divCrit = divCrit
 		self.root = Node(None)
-		self.root.dim = [2000, 800, 800]
+		self.root.dim = [1290,360,590]
 		self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
 		self.leaves = []
 
@@ -126,7 +126,7 @@ class Node():
 				self.leftChild.depth += 1
 				self.rightChild.depth += 1
 				try:
-					divisor = divCrit * self.getMax(axis)
+					divisor = int(divCrit * self.getMax(axis))
 				except ValueError:
 					# enter smart error handling here
 					# only happens when the leaf of interest is empty
@@ -140,12 +140,12 @@ class Node():
 				
 				
 				# self.leftChild.dim = copy.deepcopy(self.dim)
-				self.leftChild.dim = [i for i in self.dim]
+				self.leftChild.dim = [int(i) for i in self.dim]
 				self.leftChild.dim[axis] = divisor
 				self.leftChild.calculateVolume()
 				self.leftChild.calculateDeltaV()
 				# self.rightChild.dim = copy.deepcopy(self.dim)
-				self.rightChild.dim = [i for i in self.dim]
+				self.rightChild.dim = [int(i) for i in self.dim]
 				self.rightChild.calculateVolume()
 				self.rightChild.deltaV = self.deltaV
 
