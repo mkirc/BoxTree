@@ -99,6 +99,8 @@ of those of the two spaces A and B, where
 Vₐ,d + Vᵦ,d = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vᵦ - Vᵢ')
 ```
 
+In the case of no split:
+
 ```
     ^                                         
  y  |------------------------A                
@@ -116,7 +118,7 @@ Vₐ,d + Vᵦ,d = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vᵦ - Vᵢ')
                            x                                                    
 ```
 
-In the case of no split, the death volume of the whole thing is
+the death volume of the whole thing is
 
 ```
 Vₐ,d|notB = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vₐ - Vᵢ')
@@ -133,18 +135,30 @@ Vₐ,d|notB – Vₐ,d + Vᵦ,d 	= 	∑ᴺVₐ - ∑ᴺVᵢ + ∑ᴷVₐ - ∑�
 This leaves us with a quantity i will call ∆V,d(A,B).
 As we will see, this is a excellent measure of a split.
 
-### deltaV in Nodes
+### ∆V,d in Nodes
 
-The situation presented above corresponds exactly to parent - 
-and children - Nodes in the kdTree. We can now assign each
-Node a deltaV, where leftChild - Nodes get the new deltaV and
-rightChild - Nodes inherit those of their parents. After all,
-their volume is identical, so they make no difference in terms
-of death volume difference.
+The situation presented above corresponds exactly to parent- 
+and children-Nodes in the kdTree, where A = Parent and
+B = leftChild. We can now assign to each Node a ∆V,d, where 
+leftChild-Nodes get ∆V,d(Parent, leftChild) and rightChild-
+Nodes inherit those of their parents. 
+After all, their volume is identical, so they make no 
+difference in terms of ∆V,d.
 
-## Setup
+### and finally...
 
-...
+Now we can build the tree with a modified split function, which
+takes ∆V,d into consideration. We end up with a list of leaves,
+in which each has a 3D Point of their top right corner, and a
+∆V,d - Value. Now we just compile a list of those having a
+positive ∆V,d, plus the largest nonempty Node and sort them in 
+descending order.
+
+Here are our best N Boxes, which also minimize the death volume.
+
+## Usage
+
+tbd
 
 ## Todo
 
