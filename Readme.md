@@ -25,20 +25,20 @@ Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
 ```
 
 ```
-		    ^                                         
-		 y  |                                         
-		    |------------------B                      
-		    |//////////////////|                      
-		    |---------------P//|   B: Box(x,y)        
-		    |               |//|   P: Point(x,y)      
-		    |               |//|   /: Death Volume    
-		    |               |//|                      
-		    |               |//|                      
-		    |               |//|                      
-		    |               |//|                      
-		    |               |//|                      
-		    -------------------------->               
-		                           x     
+			    ^                                         
+			 y  |                                         
+			    |------------------B                      
+			    |//////////////////|                      
+			    |---------------P//|   B: Box(x,y)        
+			    |               |//|   P: Point(x,y)      
+			    |               |//|   /: Death Volume    
+			    |               |//|                      
+			    |               |//|                      
+			    |               |//|                      
+			    |               |//|                      
+			    |               |//|                      
+			    -------------------------->               
+			                           x     
 ```
 
 Let's call it Death Volume! ⛧
@@ -65,24 +65,24 @@ children Nodes, and the split is recursively applied, until the
 depth is Zero.
 
 ```
-		+-----+          +--------+-------(This is a split)
-		|Depth|          |        |
-		|-----|          |        |
-		| 0   |          V    1   V
-		|-----|           /--- ---\         /----+-------(These are Nodes;
-		|     |        ---         ---    /-     |        their Keys are
-		| 1   |        2             3 <--       |        ordered in a breadth
-		|-----|      /- -\         /- -\         -        first walk)
-		|     |    --     --     --     --     -/
-		| 2   |   4        5    6         7 <-/
-		|-----|  /-\      /-\  /-\       /-\
-		|     | -   -    -   --   -     -   -
-		| 3   | 8   9  10  11 12  13   14   15
-		|     |     ^
-		+-----+     |
-		           |
-		           |
-		           +----(Those are Leaves)
+	+-----+	          +--------+-------(This is a split)
+	|Depth|	          |        |
+	|-----|	          |        |
+	| 0   |	          V    1   V
+	|-----|	           /--- ---\         /----+-------(These are Nodes;
+	|     |	        ---         ---    /-     |        their Keys are
+	| 1   |	        2             3 <--       |        ordered in a breadth
+	|-----|	      /- -\         /- -\         -        first walk)
+	|     |	    --     --     --     --     -/
+	| 2   |	   4        5    6         7 <-/
+	|-----|	  /-\      /-\  /-\       /-\
+	|     |	 -   -    -   --   -     -   -
+	| 3   |	 8   9  10  11 12  13   14   15
+	|     |	     ^
+	+-----+	     |
+	       	    |
+	       	    |
+	       	    +----(Those are Leaves)
 ```
 We call the old space Parent and the new ones leftChild, if the Point-
 dimension in question was smaller than the discriminator and rightChild,
@@ -96,23 +96,23 @@ minimization, we have to do some (fairly easy) math:
 
 ### Death Volume difference 
 
-To adress the 'quality' of a split, lets look at an exmple in 2D:
+To adress the 'quality' of a split, lets look at an example in 2D:
 
 ```
-		     ^                                         
-		  y  |-----------B|-----------A                
-		     |            |           |                
-		     |            |           |                
-		     |            |        P  |                
-		     |            |           |                
-		     |            |           |                
-		     |  P'      P'|   P       |                
-		     |            |           |                
-		     |        P'  |          P|                
-		     |            |           |                
-		     |            |           |                
-		     -------------|------------>               
-		                  d         x                
+			     ^                                         
+			  y  |-----------B|-----------A                
+			     |            |           |                
+			     |            |           |                
+			     |            |        P  |                
+			     |            |           |                
+			     |            |           |                
+			     |  P'      P'|   P       |                
+			     |            |           |                
+			     |        P'  |          P|                
+			     |            |           |                
+			     |            |           |                
+			     -------------|------------>               
+			                  d         x                
 ```
 
 In the case the split is done, the total death volume is just the sum
@@ -125,20 +125,20 @@ Vₐ,d + Vᵦ,d = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vᵦ - Vᵢ')
 In the case of no split:
 
 ```
-		    ^                                         
-		 y  |------------------------A                
-		    |                        |                
-		    |                        |                
-		    |                     P  |                
-		    |                        |                
-		    |                        |                
-		    |  P'     P'     P       |                
-		    |                        |                
-		    |        P'             P|                
-		    |                        |                
-		    |                        |                
-		    -------------------------->               
-		                           x                                     
+			    ^                                         
+			 y  |------------------------A                
+			    |                        |                
+			    |                        |                
+			    |                     P  |                
+			    |                        |                
+			    |                        |                
+			    |  P'     P'     P       |                
+			    |                        |                
+			    |        P'             P|                
+			    |                        |                
+			    |                        |                
+			    -------------------------->               
+			                           x                                     
 ```
 
 the death volume of the whole thing is
@@ -166,21 +166,21 @@ B = leftChild. We can now assign to each Node a ∆V,d, where
 leftChild-Nodes get ∆V,d(Parent, leftChild) and rightChild-
 Nodes inherit those of their parents.
 ```
-		         +---+              
-		         |   |              
-		         | P | (x,y)        
-		         |   |              
-		         +---+              
-		           |                
-		           |                
-		   +-------+-------+        
-		   |x<d       x>d  |        
-		   |               |        
-		 +---+           +---+      
-		 |   |           |   |      
-		 | L | (d,y)     | R | (x,y)
-		 |   |           |   |      
-		 +---+           +---+      
+			         +---+              
+			         |   |              
+			         | P | (x,y)        
+			         |   |              
+			         +---+              
+			           |                
+			           |                
+			   +-------+-------+        
+			   |x<d       x>d  |        
+			   |               |        
+			 +---+           +---+      
+			 |   |           |   |      
+			 | L | (d,y)     | R | (x,y)
+			 |   |           |   |      
+			 +---+           +---+      
 ```
 After all, their volume is identical, so they make no 
 difference in terms of ∆V,d.
