@@ -71,7 +71,7 @@ After the programm halts, the old Pointspace is partitioned into
 If such a split makes sense in the context of death volume
 minimization, we have to do some (fairly easy) math:
 
-### Death Volume difference
+### Death Volume difference 
 
 To adress the 'quality' of a split, lets look at an exmple in 2D:
 
@@ -83,9 +83,9 @@ To adress the 'quality' of a split, lets look at an exmple in 2D:
      |            |        P  |                
      |            |           |                
      |            |           |                
-     |  P      P  |   P       |                
+     |  P'      P'|   P       |                
      |            |           |                
-     |        P   |          P|                
+     |        P'  |          P|                
      |            |           |                
      |            |           |                
      -------------|------------>               
@@ -109,9 +109,9 @@ In the case of no split:
     |                     P  |                
     |                        |                
     |                        |                
-    |  P      P      P       |                
+    |  P'     P'     P       |                
     |                        |                
-    |        P              P|                
+    |        P'             P|                
     |                        |                
     |                        |                
     -------------------------->               
