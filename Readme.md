@@ -68,7 +68,7 @@ if its Points had greater values in that dimension.
 After the programm halts, the old Pointspace is partitioned into
 2 ^ (depth) Subspaces. 
 
-To adress, if such a split makes sense in the context of death volume
+If such a split makes sense in the context of death volume
 minimization, we have to do some (fairly easy) math:
 
 ### Death Volume difference
