@@ -14,9 +14,9 @@ bottom left corner sits in the origin. It has a Volume denoted by:
 V = x * e̅,x + y * e̅,y + z * e̅,z 
 ```
 
-You got a bunch of these scattered in space, and you want to find another
-set of Boxes, which enclose all of these Points, and also minimize the
-death volume. Death volume is defined by:
+We got a bunch of these scattered in space, and want to find another
+set of Boxes, which enclose all of these Points, while minimizing the
+volume difference between Box an Point:
 
 ```
 Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
@@ -25,33 +25,36 @@ Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
 ```
 
 ```
-    ^                                         
- y  |                                         
-    |------------------B                      
-    |//////////////////|                      
-    |---------------P//|   B: Box(x,y)        
-    |               |//|   P: Point(x,y)      
-    |               |//|   /: Death Volume    
-    |               |//|                      
-    |               |//|                      
-    |               |//|                      
-    |               |//|                      
-    |               |//|                      
-    -------------------------->               
-                           x     
+		    ^                                         
+		 y  |                                         
+		    |------------------B                      
+		    |//////////////////|                      
+		    |---------------P//|   B: Box(x,y)        
+		    |               |//|   P: Point(x,y)      
+		    |               |//|   /: Death Volume    
+		    |               |//|                      
+		    |               |//|                      
+		    |               |//|                      
+		    |               |//|                      
+		    |               |//|                      
+		    -------------------------->               
+		                           x     
 ```
+
+Let's call it Death Volume! ⛧
 
 ### kd - Trees
 
-The lets look at a divide-and-conqer strategy: a tree. More precisely,
-a 3dimensional bipartion tree or short: kdTree. I'll just summarize some
-key details here, you can read read the rest on [wikipedia](https://en.wikipedia.org/wiki/K-d_tree).
+We apply a classic divide-and-conqer strategy: a tree. More precisely,
+a 3-dimensional bipartion tree or short, kdTree. I'll just describe
+what we do here, you can read read the rest on [wikipedia](https://en.wikipedia.org/wiki/K-d_tree).
 
-The tree takes a set of Points, an axis, a discriminat and a depth.
-Now it splits the set of Points along the axis on the discriminant,
+The tree takes a set of Points, an axis, a discriminant and a depth.
+
+It splits the set of Points along the axis on the discriminant,
 which is a value exactly in the center between Zero and the maximal
 Value a Point in the set has on that axis. Then the axis is rotated, 
-in my code i do
+like so
 
 ```python
 axis = (axis + 1) % 3
@@ -61,6 +64,26 @@ and the depth is decremented. Those values are passed to the new
 children Nodes, and the split is recursively applied, until the 
 depth is Zero.
 
+```
+		+-----+          +--------+-------(This is a split)
+		|Depth|          |        |
+		|-----|          |        |
+		| 0   |          V    1   V
+		|-----|           /--- ---\         /----+-------(These are Nodes;
+		|     |        ---         ---    /-     |        their Keys are
+		| 1   |        2             3 <--       |        ordered in a breadth
+		|-----|      /- -\         /- -\         -        first walk)
+		|     |    --     --     --     --     -/
+		| 2   |   4        5    6         7 <-/
+		|-----|  /-\      /-\  /-\       /-\
+		|     | -   -    -   --   -     -   -
+		| 3   | 8   9  10  11 12  13   14   15
+		|     |     ^
+		+-----+     |
+		           |
+		           |
+		           +----(Those are Leaves)
+```
 We call the old space Parent and the new ones leftChild, if the Point-
 dimension in question was smaller than the discriminator and rightChild,
 if its Points had greater values in that dimension. 
@@ -76,20 +99,20 @@ minimization, we have to do some (fairly easy) math:
 To adress the 'quality' of a split, lets look at an exmple in 2D:
 
 ```
-     ^                                         
-  y  |-----------B|-----------A                
-     |            |           |                
-     |            |           |                
-     |            |        P  |                
-     |            |           |                
-     |            |           |                
-     |  P'      P'|   P       |                
-     |            |           |                
-     |        P'  |          P|                
-     |            |           |                
-     |            |           |                
-     -------------|------------>               
-                  d         x                
+		     ^                                         
+		  y  |-----------B|-----------A                
+		     |            |           |                
+		     |            |           |                
+		     |            |        P  |                
+		     |            |           |                
+		     |            |           |                
+		     |  P'      P'|   P       |                
+		     |            |           |                
+		     |        P'  |          P|                
+		     |            |           |                
+		     |            |           |                
+		     -------------|------------>               
+		                  d         x                
 ```
 
 In the case the split is done, the total death volume is just the sum
@@ -102,20 +125,20 @@ Vₐ,d + Vᵦ,d = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vᵦ - Vᵢ')
 In the case of no split:
 
 ```
-    ^                                         
- y  |------------------------A                
-    |                        |                
-    |                        |                
-    |                     P  |                
-    |                        |                
-    |                        |                
-    |  P'     P'     P       |                
-    |                        |                
-    |        P'             P|                
-    |                        |                
-    |                        |                
-    -------------------------->               
-                           x                                                    
+		    ^                                         
+		 y  |------------------------A                
+		    |                        |                
+		    |                        |                
+		    |                     P  |                
+		    |                        |                
+		    |                        |                
+		    |  P'     P'     P       |                
+		    |                        |                
+		    |        P'             P|                
+		    |                        |                
+		    |                        |                
+		    -------------------------->               
+		                           x                                     
 ```
 
 the death volume of the whole thing is
@@ -124,7 +147,7 @@ the death volume of the whole thing is
 Vₐ,d|notB = ∑ᴺ(Vₐ - Vᵢ) + ∑ᴷ(Vₐ - Vᵢ')
 ```
 
-To give us an idea of the difference in death volume we do:
+If we subtract the two equations from another, we get:
 
 ```
 Vₐ,d|notB – Vₐ,d + Vᵦ,d 	= 	∑ᴺVₐ - ∑ᴺVᵢ + ∑ᴷVₐ - ∑ᴷ Vᵢ'
@@ -141,7 +164,24 @@ The situation presented above corresponds exactly to parent-
 and children-Nodes in the kdTree, where A = Parent and
 B = leftChild. We can now assign to each Node a ∆V,d, where 
 leftChild-Nodes get ∆V,d(Parent, leftChild) and rightChild-
-Nodes inherit those of their parents. 
+Nodes inherit those of their parents.
+```
+		         +---+              
+		         |   |              
+		         | P | (x,y)        
+		         |   |              
+		         +---+              
+		           |                
+		           |                
+		   +-------+-------+        
+		   |x<d       x>d  |        
+		   |               |        
+		 +---+           +---+      
+		 |   |           |   |      
+		 | L | (d,y)     | R | (x,y)
+		 |   |           |   |      
+		 +---+           +---+      
+```
 After all, their volume is identical, so they make no 
 difference in terms of ∆V,d.
 
