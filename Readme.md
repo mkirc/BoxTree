@@ -23,6 +23,9 @@ Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
 							Vᵢ = Volume of Point i 
 							n = Number of Points in outer Box
 ```
+Let's call it Death Volume! ⛧ 
+
+Shown here is a 2D examplification with only one Point:
 
 ```
 			    ^                                         
@@ -30,7 +33,7 @@ Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
 			    |------------------B                      
 			    |//////////////////|                      
 			    |---------------P//|   B: Box(x,y)        
-			    |               |//|   P: Point(x,y)      
+			    |               |//|   P: Point(x,y (but different ones))      
 			    |               |//|   /: Death Volume    
 			    |               |//|                      
 			    |               |//|                      
@@ -40,8 +43,6 @@ Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
 			    -------------------------->               
 			                           x     
 ```
-
-Let's call it Death Volume! ⛧
 
 ### kd - Trees
 
@@ -191,10 +192,40 @@ Now we can build the tree with a modified split function, which
 takes ∆V,d into consideration. We end up with a list of leaves,
 in which each has a 3D Point of their top right corner, and a
 ∆V,d - Value. Now we just compile a list of those having a
-positive ∆V,d, plus the largest nonempty Node and sort them in 
+positive ∆V,d, plus the largest non-empty Node and sort them in 
 descending order.
 
 Here are our best N Boxes, which also minimize the death volume.
+
+### since you made it this far
+
+Remember the 2D simplification from the beginning?
+
+Here is what happens when i try to draw a
+three dimensional volume difference in ascii:
+
+```                                                                          
+		    ^             /----------------------+                                
+		 ?  |         /---///////////////////////|                              
+		    |     /--- //////////////////////////|                                
+		    |  +-------//////////////////////////|                                
+		    |  |\\\\\\\\\\\\\\\\\\\\\\\\\\-+/////|                                
+		    |  |\\\\\\\\\\\\\\\\\\\\\\\\\\-|/////|                                
+		    |  |\\\\\\\\\\\\\\\\\\\\\\-\\\\|/////|                                
+		    |  +--------|--#######+\\\\\\\\|/////|                                
+		    |  |        |  #######|\\\\\\\\|/////|                                
+		    |  |        |  #######|\\\\\\\\|/////|                                
+		    |  |        |  #######|\\\\\\\\|/////|                                
+		    |  |        |  #######|\\\\\\\\|/////|                                
+		    |  |        |  #######|\\\\\\\\|/////+                                
+		    |  |      /-+----------\\\\\\\\+//////-                               
+		    |  |    /----         |\\\\\\--////--                                 
+		    |  |  /--             |\\\\-////--                                    
+		    |  +------------------+----+ --                                       
+		    +------------------------------------->                               
+		                                        !                                 
+```
+I h̗̞opͫ̍̅e͚͚ͭͤ y̜̝ͤ̆oͫ͊ụ̗̥̩̤̦͗͊̎̀̔̇ dó̜̪ͧn'̟͎̐̎t̾̔̄ m̘͙̝̞͓̘̼̬̩̖̗͓̬̱̈́̊͛͐̈͑̏ͯ̿̅̃̾ͩ́̚͝͠ͅin̨̥͚͕̙̼̥̖̱̘̭ͤ̐̇̓ͧ͑̊̎ͧ͒d̴̈́͋̅̿͋̈́ͩ̌͂̇̚
 
 ## Usage
 
