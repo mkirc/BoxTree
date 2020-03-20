@@ -20,8 +20,8 @@ death volume. Death volume is defined by:
 
 ```
 Vᵦ,d = ∑ⁿ(Vᵦ - Vᵢ)			, where		Vᵦ = Volume of outer Box
-										Vᵢ = Volume of Point i 
-										n = Number of Points in outer Box
+							Vᵢ = Volume of Point i 
+							n = Number of Points in outer Box
 ```
 
 ```
@@ -126,8 +126,8 @@ To give us an idea of the difference in death volume we do:
 
 ```
 Vₐ,d|notB – Vₐ,d + Vᵦ,d 	= 	∑ᴺVₐ - ∑ᴺVᵢ + ∑ᴷVₐ - ∑ᴷ Vᵢ'
-							  –(∑ᴺVₐ - ∑ᴺVᵢ + ∑ᴷVᵦ - ∑ᴷ Vᵢ')
-							=	∑ᴷ(Vₐ - Vᵦ)
+				       –(∑ᴺVₐ - ∑ᴺVᵢ + ∑ᴷVᵦ - ∑ᴷ Vᵢ')
+				=	∑ᴷ(Vₐ - Vᵦ)
 ```
 
 This leaves us with a quantity i will call ∆V,d(A,B).
