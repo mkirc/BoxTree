@@ -3,6 +3,7 @@ import math
 import copy
 
 from classes.point import *
+from classes.writer import *
 
 
 class kdTree():
@@ -165,6 +166,7 @@ class TreeControl():
 		self.endTotalVolume = 0
 		# self.pf.loadPoints(path)
 		# self.itemBoxes = self.pf.getItemBoxes()
+		self.writer = Writer()
 		self.itemBoxes = []
 		self.tree = None
 		self.bestNodes = []
@@ -228,58 +230,14 @@ class TreeControl():
 
 	def writeOutNewItemBoxes(self, path):
 
-		print('start writing...')
+		
 		self.tree.leaves.sort(key=lambda node:node.id)
 		bestNodesCopy = [i for i in self.bestNodes]
+		bestNodesCopy.sort(key=lambda tup:tup[0])
 
-		with open(path, 'w+') as openFile:
+		print('start writing...')
+		self.writer.write(path, bestNodesCopy, self.tree.leaves)
 
-			
-			bestNodesCopy.sort(key=lambda tup:tup[0])
-
-			for l in self.tree.leaves:
-
-				if l.id < bestNodesCopy[0][0]:
-					
-					kNom = 'KARTON' + ' ' + str(self.bestNodes[0][0])
-					kDimX = bestNodesCopy[0][1].dim[0]
-					kDimY = bestNodesCopy[0][1].dim[1]
-					kDimZ = bestNodesCopy[0][1].dim[2]
-
-					for point in l.points:
-
-						pDimX = point.dim[0]
-						pDimY = point.dim[1]
-						pDimZ = point.dim[2]
-
-						line = '%s,%s,%s,%s,%s,%s,%s,\n' % (kNom,kDimX,kDimY,kDimZ,pDimX,pDimY,pDimZ)
-
-						openFile.write(line)
-
-				elif l.id == bestNodesCopy[0][0]:
-
-					kNom = 'KARTON' + ' ' + str(self.bestNodes[0][0])
-					kDimX = bestNodesCopy[0][1].dim[0]
-					kDimY = bestNodesCopy[0][1].dim[1]
-					kDimZ = bestNodesCopy[0][1].dim[2]
-
-					for point in l.points:
-						
-						pDimX = point.dim[0]
-						pDimY = point.dim[1]
-						pDimZ = point.dim[2]
-
-						line = '%s,%s,%s,%s,%s,%s,%s,\n' % (kNom,kDimX,kDimY,kDimZ,pDimX,pDimY,pDimZ)
-
-						openFile.write(line)
-
-					lastNode = bestNodesCopy.pop(0)
-					# print('last Node: %s. Only %s to go!' % (lastNode[0], len(self.bestNodes)))
-			else:
-
-				print('✔ finished writing %s' % (path))
-				print('')
-				return
 
 	def getNewItemBoxes(self, path):
 
