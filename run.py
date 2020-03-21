@@ -6,20 +6,29 @@ from classes.tree import *
 
 class TreeController():
 
-	def __init__(self, path):
+	def __init__(self):
 
-		self.pf = PointFactory()
+		# self.pf = PointFactory()
+		self.ibf = ItemBoxFactory()
 		self.initialTotalDeadVolume = 0
 		self.initialTotalVolume = 0
 		self.endTotalVolume = 0
-		self.pf.loadPoints(path)
-		self.itemBoxes = self.pf.getItemBoxes()
+		# self.pf.loadPoints(path)
+		# self.itemBoxes = self.pf.getItemBoxes()
+		self.itemBoxes = []
 		self.tree = None
 		self.bestNodes = []
 		self.newItemBoxes = None
 		self.newTotalDeadVolume = 0
 		self.newTotalVolume = 0
 		self.gain = 0
+
+	def getInitialItemBoxes(self, path):
+
+		self.ibf.loadCSV(path)
+		self.itemBoxes = self.ibf.getItemBoxes()
+		self.ibf.reset()
+
 
 	def initializeTree(self, d, c, s):
 
@@ -122,10 +131,17 @@ class TreeController():
 				print('')
 				return
 
-	def getNewValues(self, path):
+	def getNewItemBoxes(self, path):
 
-		self.pf.loadPoints(path, new=True)
-		self.newItemBoxes = self.pf.getNewItemBoxes()
+		self.ibf.loadCSV(path)
+		self.newItemBoxes = self.ibf.getItemBoxes()
+		self.ibf.reset()
+
+
+	def getNewValues(self):
+
+		# self.pf.loadPoints(path, new=True)
+		# self.newItemBoxes = self.pf.getNewItemBoxes()
 		self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes])
 		self.newTotalDeadVolume =  (np.sum([b[1].vol for b in self.newItemBoxes])
 										- self.newTotalVolume)
@@ -180,8 +196,9 @@ def run():
 
 	outPath = 'assets/new_boxes_86.csv'
 
-	t = TreeController('assets/raw_data_01.csv')
-
+	# t = TreeController('assets/raw_data_01.csv')
+	t = TreeController()
+	t.getInitialItemBoxes('assets/raw_data_01.csv')
 	t.getInitialValues()
 	t.initializeTree(depth, divCrit, startAxis)
 	p = [i[0] for i in t.itemBoxes]
@@ -196,7 +213,9 @@ def run():
 	t.getBestNodes()
 
 	t.writeOutNewItemBoxes(outPath)
-	t.getNewValues(outPath)
+
+	t.getNewItemBoxes(outPath)
+	t.getNewValues()
 
 	t.printInfo(numPoints, bestN=True)
 
