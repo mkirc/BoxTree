@@ -2,53 +2,56 @@
 
 class Writer():
 
-	def __init__(self):
+    def __init__(self):
 
-		pass
+        pass
 
-	def write(self, path, bestNodesCopy, leaves):
+    def write(self, path, bestNodesCopy, leaves):
 
-		with open(path, 'w+') as openFile:
-			for l in leaves:
+        with open(path, 'w+') as openFile:
+            for l in leaves:
 
-				if l.id < bestNodesCopy[0][0]:
-					
-					kNom = 'KARTON' + ' ' + str(bestNodesCopy[0][0])
-					kDimX = bestNodesCopy[0][1].dim[0]
-					kDimY = bestNodesCopy[0][1].dim[1]
-					kDimZ = bestNodesCopy[0][1].dim[2]
+                if l.id < bestNodesCopy[0][0]:
 
-					for point in l.points:
+                    kNom = 'KARTON' + ' ' + str(bestNodesCopy[0][0])
+                    kDimX = bestNodesCopy[0][1].dim[0]
+                    kDimY = bestNodesCopy[0][1].dim[1]
+                    kDimZ = bestNodesCopy[0][1].dim[2]
 
-						pDimX = point.dim[0]
-						pDimY = point.dim[1]
-						pDimZ = point.dim[2]
+                    for point in l.points:
 
-						line = '%s,%s,%s,%s,%s,%s,%s,\n' % (kNom,kDimX,kDimY,kDimZ,pDimX,pDimY,pDimZ)
+                        pDimX = point.dim[0]
+                        pDimY = point.dim[1]
+                        pDimZ = point.dim[2]
 
-						openFile.write(line)
+                        line = '%s,%s,%s,%s,%s,%s,%s,\n' % (
+                            kNom, kDimX, kDimY, kDimZ, pDimX, pDimY, pDimZ)
 
-				elif l.id == bestNodesCopy[0][0]:
+                        openFile.write(line)
 
-					kNom = 'KARTON' + ' ' + str(bestNodesCopy[0][0])
-					kDimX = bestNodesCopy[0][1].dim[0]
-					kDimY = bestNodesCopy[0][1].dim[1]
-					kDimZ = bestNodesCopy[0][1].dim[2]
+                elif l.id == bestNodesCopy[0][0]:
 
-					for point in l.points:
-						
-						pDimX = point.dim[0]
-						pDimY = point.dim[1]
-						pDimZ = point.dim[2]
+                    kNom = 'KARTON' + ' ' + str(bestNodesCopy[0][0])
+                    kDimX = bestNodesCopy[0][1].dim[0]
+                    kDimY = bestNodesCopy[0][1].dim[1]
+                    kDimZ = bestNodesCopy[0][1].dim[2]
 
-						line = '%s,%s,%s,%s,%s,%s,%s,\n' % (kNom,kDimX,kDimY,kDimZ,pDimX,pDimY,pDimZ)
+                    for point in l.points:
 
-						openFile.write(line)
+                        pDimX = point.dim[0]
+                        pDimY = point.dim[1]
+                        pDimZ = point.dim[2]
 
-					lastNode = bestNodesCopy.pop(0)
-					# print('last Node: %s. Only %s to go!' % (lastNode[0], len(self.bestNodes)))
-			else:
+                        line = '%s,%s,%s,%s,%s,%s,%s,\n' % (
+                            kNom, kDimX, kDimY, kDimZ, pDimX, pDimY, pDimZ)
 
-				print('✔ finished writing %s' % (path))
-				print('')
-				return
+                        openFile.write(line)
+
+                    lastNode = bestNodesCopy.pop(0)
+                    # print('last Node: %s. Only %s to go!' % (lastNode[0], len(self.bestNodes)))
+            else:
+
+                # print('✔ finished writing %s' % (path))
+                print('finished writing %s' % (path))
+                print('')
+                return
