@@ -229,7 +229,49 @@ I h̗̞opͫ̍̅e͚͚ͭͤ y̜̝ͤ̆oͫ͊ụ̗̥̩̤̦͗͊̎̀̔̇ dó̜̪ͧn'̐�
 
 ## Usage
 
-tbd
+Just cd into the root and run it like
+```bash
+python3 run.py
+```
+The csv format is not really standard, basically Name,Box.x,Box.y,Box.z,Item.x,Item.y,Item.z,\n
+
+Maybe when we start to care for proper .csv implementation this can change.
+
+Here is an explanation of run.py.
+```python
+from classes.tree import * # imports the TreeControl() Object
+
+depth = 13 # defines depth of tree, obviously
+divCrit = 0.5 # tweaks the discriminant, normally set to 0.5, but you know, its your choice
+startAxis = 0 # pretty much self explanatory
+numPoints = 47287 	# mostly for testing, normally you just want to churn all of them
+p = [i[0] for i in t.itemBoxes] 
+
+newPath = 'assets/your.csv' # but you could really pick any path you like
+
+t = TreeControl()
+t.getInitialItemBoxes('assets/your_new.csv') # same same
+t.getInitialValues()
+
+t.initializeTree(depth, divCrit, startAxis)
+
+t.tree.insert(p[0:numPoints])
+
+
+t.tree.grow()
+
+t.isNumPointsConst() # sanity check
+
+t.getBestNodes()
+# i know its not really necessary to write them out as csv, but i think its
+# handy for comparison and whatnot
+t.writeOutNewItemBoxes(newPath)
+# this is really an artifact of the design decision above
+t.getNewItemBoxes(newPath)
+t.getNewValues()
+
+t.printInfo(numPoints, bestN=True) # here comes the juice
+```
 
 ## Todo
 
@@ -237,6 +279,6 @@ tbd
 -	Load Points ✔
 -	Build kd Tree over Point Space ✔
 -	compare new death volume to initial ✔
--	Rotate / compare initial Placement of Hyperplane
+-	Rotate / compare initial Placement of Hyperplane # not really yet
 -	Draw Graphs!!
 
