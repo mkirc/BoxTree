@@ -176,8 +176,8 @@ class TreeControl():
 
     def getInitialValues(self):
 
-        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes])
-        self.initialTotalDeadVolume = (np.sum([b[1].vol for b in self.itemBoxes])
+        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalDeadVolume = (np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
                                        - self.initialTotalVolume)
 
     def getDeltaVs(self, bestN=None):
@@ -235,8 +235,8 @@ class TreeControl():
 
         # self.pf.loadPoints(path, new=True)
         # self.newItemBoxes = self.pf.getNewItemBoxes()
-        self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes])
-        self.newTotalDeadVolume = (np.sum([b[1].vol for b in self.newItemBoxes])
+        self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes],dtype=np.int64)
+        self.newTotalDeadVolume = (np.sum([b[1].vol for b in self.newItemBoxes],dtype=np.int64)
                                    - self.newTotalVolume)
         self.gain = self.newTotalDeadVolume / self.initialTotalDeadVolume
 
