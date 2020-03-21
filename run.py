@@ -1,5 +1,3 @@
-import numpy
-import math
 from classes.tree import *
 
 def run():
@@ -10,7 +8,6 @@ def run():
 	numPoints = 47287
 	newPath = 'assets/new_boxes_86.csv'
 
-	# t = TreeController('assets/raw_data_01.csv')
 	t = TreeControl()
 	t.getInitialItemBoxes('assets/raw_data_01.csv')
 	t.getInitialValues()
