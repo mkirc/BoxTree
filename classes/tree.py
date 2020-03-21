@@ -155,14 +155,3 @@ class Node():
 
 				self.leftChild.split((depth), axis, divCrit)
 				self.rightChild.split((depth), axis, divCrit)
-
-		# else:
-		# 	depth = depth - 1
-		# 	axis = (axis + 1) % 3
-		# 	self.leftChild.split((depth), axis, divCrit)
-		# 	self.rightChild.split((depth), axis, divCrit)	
-
- 
-
-
-
