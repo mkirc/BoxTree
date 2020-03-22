@@ -1,4 +1,5 @@
 
+import matplotlib.pyplot as plt
 
 class Writer():
 
@@ -6,7 +7,15 @@ class Writer():
 
         pass
 
+    def plot(self, nodeList):
+
+            fig, ax = plt.subplots()
+            ax.plot(nodeList)
+            ax.set_yscale('log')
+            plt.show()
+
     def write(self, path, bestNodesCopy, leaves):
+        '''conceptually wrong, should be avoided'''
 
         with open(path, 'w+') as openFile:
             for l in leaves:
@@ -55,3 +64,5 @@ class Writer():
                 print('finished writing %s' % (path))
                 print('')
                 return
+
+
