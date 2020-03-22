@@ -64,9 +64,12 @@ class ItemBoxFactory():
 
         return self.itemBoxes.append([item, box])
 
-    def getItemBoxes(self):
+    def getItemBoxes(self, numPoints=None):
 
-        return self.itemBoxes
+        if numPoints is not None:
+            return self.itemBoxes[:numPoints]
+        else:
+            return self.itemBoxes
 
     def reset(self):
 

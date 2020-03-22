@@ -2,21 +2,21 @@ from classes.tree import TreeControl
 
 def run():
 
-    depth = 13
+    depth = 2
     divCrit = 0.5
     startAxis = 0
-    numPoints = 47287
-    newPath = 'assets/new_boxes_86.csv'
+    MaxNumPoints = None
+    newPath = 'assets/new_boxes.csv'
 
     t = TreeControl()
-    t.getInitialItemBoxes('assets/raw_data_01.csv')
+    t.getInitialItemBoxes('assets/47k.csv', MaxNumPoints)
 
     t.getInitialValues()
 
     t.initializeTree(depth, divCrit, startAxis)
+    
     p = [i[0] for i in t.itemBoxes]
-    t.tree.insert(p[0:numPoints])
-
+    t.tree.insert(p)
 
     t.tree.grow()
 
@@ -30,7 +30,7 @@ def run():
     t.getNewItemBoxes(newPath)
     t.getNewValues()
 
-    t.printInfo(numPoints, bestN=True)
+    t.printInfo(bestN=True)
 
 
 run()

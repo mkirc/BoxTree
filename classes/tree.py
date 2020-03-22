@@ -14,13 +14,15 @@ class kdTree():
         self.axis = startAxis
         self.divCrit = divCrit
         self.root = Node(None)
-        self.root.dim = [1290, 360, 590]
+        self.root.dim = [0, 0, 0]
         self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
         self.leaves = []
 
     def insert(self, points):
 
         self.root.points = points
+
+        self.root.dim = self.getMaxOfAllAx()
 
     def grow(self):
 
@@ -31,6 +33,16 @@ class kdTree():
         self.breathFirstWalk()
 
         print('finished tree groth.')
+
+    def getMaxOfAllAx(self):
+
+        cur = [0, 0, 0]
+        for i in range(0, 3):
+            cur[i] = self.root.getMax(i)
+        print(cur)
+
+        return cur
+
 
 
     def getLeaves(self):
@@ -163,10 +175,10 @@ class TreeControl():
         self.newTotalVolume = 0
         self.gain = 0
 
-    def getInitialItemBoxes(self, path):
+    def getInitialItemBoxes(self, path, numPoints=None):
 
         self.ibf.loadCSV(path)
-        self.itemBoxes = self.ibf.getItemBoxes()
+        self.itemBoxes = self.ibf.getItemBoxes(numPoints)
         self.ibf.reset()
 
 
@@ -239,9 +251,10 @@ class TreeControl():
                                    - self.newTotalVolume)
         self.gain = self.newTotalDeadVolume / self.initialTotalDeadVolume
 
-    def printInfo(self, numPoints, extended=False, bestN=False):
+    def printInfo(self, extended=False, bestN=False):
 
-        print('Number of Points:\t\t\t%i' % numPoints)
+        print('Number of Points:\t\t\t%i' % len(self.itemBoxes))
+        print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
         print('initial total Volume:\t\t%.4e' % self.initialTotalVolume)
         print('initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
         print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
