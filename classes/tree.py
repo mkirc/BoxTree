@@ -22,7 +22,7 @@ class kdTree():
 
         self.root.points = points
 
-        self.root.dim = self.getMaxOfAllAx()
+        self.getMaxOfAllAx()
 
     def grow(self):
 
@@ -36,13 +36,9 @@ class kdTree():
 
     def getMaxOfAllAx(self):
 
-        cur = [0, 0, 0]
         for i in range(0, 3):
-            cur[i] = self.root.getMax(i)
-        print(cur)
-
-        return cur
-
+            self.root.dim[i] = max([p.dim[i] for p in self.root.points])
+        return
 
 
     def getLeaves(self):
@@ -86,15 +82,9 @@ class Node():
         self.parent = parent
         self.points = []
         self.dim = []
+        self.lastCut = [0, 0, 0]
         self.vol = None
         self.deltaV = 0
-
-
-    def getMax(self, axis):
-
-        cur_max = max([p.dim[axis] for p in self.points])
-
-        return cur_max
 
     def getLeaves(self):
 
@@ -125,7 +115,7 @@ class Node():
                 self.leftChild.depth += 1
                 self.rightChild.depth += 1
                 try:
-                    divisor = int(divCrit * self.getMax(axis))
+                    divisor = int(divCrit * (self.dim[axis] - self.lastCut[axis])) + self.lastCut[axis]
                 except ValueError:
                     # enter smart error handling here
                     # only happens when the leaf of interest is empty
@@ -138,12 +128,11 @@ class Node():
                         self.rightChild.points.append(point)
                 
                 
-                # self.leftChild.dim = copy.deepcopy(self.dim)
                 self.leftChild.dim = [int(i) for i in self.dim]
                 self.leftChild.dim[axis] = divisor
                 self.leftChild.calculateVolume()
                 self.leftChild.calculateDeltaV()
-                # self.rightChild.dim = copy.deepcopy(self.dim)
+                self.rightChild.lastCut[axis] = divisor
                 self.rightChild.dim = [int(i) for i in self.dim]
                 self.rightChild.calculateVolume()
                 self.rightChild.deltaV = self.deltaV

@@ -5,11 +5,11 @@ def run():
     depth = 2
     divCrit = 0.5
     startAxis = 0
-    MaxNumPoints = None
+    MaxNumPoints = 10
     newPath = 'assets/new_boxes.csv'
 
     t = TreeControl()
-    t.getInitialItemBoxes('assets/47k.csv', MaxNumPoints)
+    t.getInitialItemBoxes('assets/1M_old.csv', MaxNumPoints)
 
     t.getInitialValues()
 
