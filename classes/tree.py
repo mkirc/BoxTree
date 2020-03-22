@@ -1,6 +1,6 @@
-import numpy
+# import numpy
 import math
-import copy
+# import copy
 
 from classes.point import *
 from classes.writer import *
@@ -17,7 +17,7 @@ class kdTree():
         self.axis = startAxis
         self.divCrit = divCrit
         self.root = Node(None)
-        self.root.dim = [1290,360,590]
+        self.root.dim = [1290, 360, 590]
         self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
         self.leaves = []
 
@@ -33,7 +33,7 @@ class kdTree():
 
         self.breathFirstWalk()
 
-        print('✔ finished tree groth.')
+        print('finished tree groth.')
 
 
     def getLeaves(self):
@@ -65,13 +65,7 @@ class kdTree():
 
 
 
-        
-
-        
-
 class Node():
-
-
 
     def __init__(self, parent):
 
@@ -86,15 +80,12 @@ class Node():
         self.vol = None
         self.deltaV = 0
 
-        # Node.NODE_ID += 1
-
 
     def getMax(self, axis):
 
         cur_max = max([p.dim[axis] for p in self.points])
 
         return cur_max
-
 
     def getLeaves(self):
 
@@ -188,9 +179,9 @@ class TreeControl():
 
     def getInitialValues(self):
 
-        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes])
-        self.initialTotalDeadVolume =  (np.sum([b[1].vol for b in self.itemBoxes])
-                                        - self.initialTotalVolume)
+        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalDeadVolume = (np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
+                                       - self.initialTotalVolume)
 
     def getDeltaVs(self, bestN=None):
 
@@ -222,40 +213,34 @@ class TreeControl():
         for node in self.tree.leaves:
 
             allPoints += node.points
-
         assert len(allPoints) == len(self.tree.root.points)
-        print('✔ no points lost!')
+        # print('✔ no points lost!')
+        print('no points lost!')
         print('')
         return
-
-    def writeOutNewItemBoxes(self, path):
-
-        
-        self.tree.leaves.sort(key=lambda node:node.id)
-        bestNodesCopy = [i for i in self.bestNodes]
-        bestNodesCopy.sort(key=lambda tup:tup[0])
-
-        print('start writing...')
-        self.writer.write(path, bestNodesCopy, self.tree.leaves)
-
 
     def getNewItemBoxes(self, path):
 
         self.ibf.loadCSV(path)
         self.newItemBoxes = self.ibf.getItemBoxes()
         self.ibf.reset()
+    def writeOutNewItemBoxes(self, path):
 
+        self.tree.leaves.sort(key=lambda node: node.id)
+        bestNodesCopy = [i for i in self.bestNodes]
+        bestNodesCopy.sort(key=lambda tup: tup[0])
+
+        print('start writing...')
+        self.writer.write(path, bestNodesCopy, self.tree.leaves)
 
     def getNewValues(self):
 
         # self.pf.loadPoints(path, new=True)
         # self.newItemBoxes = self.pf.getNewItemBoxes()
-        self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes])
-        self.newTotalDeadVolume =  (np.sum([b[1].vol for b in self.newItemBoxes])
-                                        - self.newTotalVolume)
+        self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes],dtype=np.int64)
+        self.newTotalDeadVolume = (np.sum([b[1].vol for b in self.newItemBoxes],dtype=np.int64)
+                                   - self.newTotalVolume)
         self.gain = self.newTotalDeadVolume / self.initialTotalDeadVolume
-
-
 
     def printInfo(self, numPoints, extended=False, bestN=False):
 

@@ -10,6 +10,7 @@ def run():
 
     t = TreeControl()
     t.getInitialItemBoxes('assets/raw_data_01.csv')
+
     t.getInitialValues()
 
     t.initializeTree(depth, divCrit, startAxis)
