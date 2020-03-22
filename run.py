@@ -2,14 +2,14 @@ from classes.tree import TreeControl
 
 def run():
 
-    depth = 2
+    depth = 13
     divCrit = 0.5
     startAxis = 0
-    MaxNumPoints = 10
+    MaxNumPoints = None
     newPath = 'assets/new_boxes.csv'
 
     t = TreeControl()
-    t.getInitialItemBoxes('assets/1M_old.csv', MaxNumPoints)
+    t.getInitialItemBoxes('assets/47k.csv', MaxNumPoints)
 
     t.getInitialValues()
 
@@ -25,12 +25,13 @@ def run():
 
     t.getBestNodes()
 
-    t.writeOutNewItemBoxes(newPath)
+    # t.writeOutNewItemBoxes(newPath)
+    t.writeNewBoxesCSV(newPath)
 
-    t.getNewItemBoxes(newPath)
-    t.getNewValues()
+    # t.getNewItemBoxes(newPath)
+    # t.getNewValues()
 
-    t.printInfo(bestN=True)
+    t.printInfo(extended=False, bestN=True)
 
 
 run()
