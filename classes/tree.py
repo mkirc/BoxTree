@@ -1,9 +1,6 @@
-# import numpy
-import math
-# import copy
-
-from classes.point import *
-from classes.writer import *
+import numpy as np
+from classes.point import Point, ItemBoxFactory
+from classes.writer import Writer
 
 
 class kdTree():

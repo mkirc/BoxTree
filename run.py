@@ -1,4 +1,4 @@
-from classes.tree import *
+from classes.tree import TreeControl
 
 def run():
 

@@ -175,7 +175,7 @@ Nodes inherit those of their parents.
 			           |                
 			           |                
 			   +-------+-------+        
-			   |x<d       x>d  |        
+			   |x<d         x>d|        
 			   |               |        
 			 +---+           +---+      
 			 |   |           |   |      
@@ -239,7 +239,7 @@ Maybe when we start to care for proper .csv implementation this can change.
 
 Here is an explanation of run.py.
 ```python
-from classes.tree import * # imports the TreeControl() Object
+from classes.tree import TreeControl
 
 depth = 13 # defines depth of tree, obviously
 divCrit = 0.5 # tweaks the discriminant, normally set to 0.5, but you know, its your choice
@@ -275,10 +275,7 @@ t.printInfo(numPoints, bestN=True) # here comes the juice
 
 ## Todo
 
--	Define a Metric for assessing progress ✔
--	Load Points ✔
--	Build kd Tree over Point Space ✔
--	compare new death volume to initial ✔
--	Rotate / compare initial Placement of Hyperplane # not really yet
+-	pick N from BestBoxes
+-	Rotate / compare initial Placement of Hyperplane
 -	Draw Graphs!!
 
