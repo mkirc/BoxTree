@@ -53,8 +53,9 @@ what we do here, you can read read the rest on [wikipedia](https://en.wikipedia.
 The tree takes a set of Points, an axis, a discriminant and a depth.
 
 It splits the set of Points along the axis on the discriminant,
-which is a value exactly in the center between Zero and the maximal
-Value a Point in the set has on that axis. Then the axis is rotated, 
+which is a value exactly in the center between Zero and the value of Box
+in that dimension, respectively that value plus the offset from the previous
+split in this dimension. Then the axis is rotated, 
 like so
 
 ```python
@@ -275,7 +276,8 @@ t.printInfo(numPoints, bestN=True) # here comes the juice
 
 ## Todo
 
--	pick N from BestBoxes
+-	rewrite assignment of Points into the new Boxes
+-	pick bestN from NewBoxes
 -	Rotate / compare initial Placement of Hyperplane
 -	Draw Graphs!!
 
