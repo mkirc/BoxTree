@@ -26,7 +26,6 @@ def run():
     t.isNumPointsConst()
 
     t.getBestNodes()
-
     t.writeNewBoxesCSV(30, outPath)
 
     t.printInfo(extended=False,leaves=False)

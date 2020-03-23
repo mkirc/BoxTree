@@ -156,7 +156,8 @@ class TreeControl():
 
         self.ibf = ItemBoxFactory()
         self.initialTotalDeadVolume = 0
-        self.initialTotalVolume = 0
+        self.initialTotalBoxVolume = 0
+        self.initialTotalItemVolume = 0
         self.endTotalVolume = 0
         self.writer = Writer()
         self.itemBoxes = []
@@ -180,9 +181,9 @@ class TreeControl():
 
     def getInitialValues(self):
 
-        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
-        self.initialTotalDeadVolume = (np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
-                                       - self.initialTotalVolume)
+        self.initialTotalItemVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalBoxVolume = np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalDeadVolume = (self.initialTotalBoxVolume - self.initialTotalItemVolume)
 
     def getDeltaVs(self, bestN=None):
 
@@ -205,6 +206,28 @@ class TreeControl():
             if dV == 0:
                 break
         return
+
+    def findLargestNonEmpty(self):
+
+        largest = [None, None, None]
+
+        for d in range(0, 3):
+            cur = None
+            for n in self.tree.leaves:
+                if len(n.points) > 0:
+                    if cur is None:
+                        cur = n
+                    elif n.dim[d] > cur.dim[d]:
+                        largest[d] = n
+                        break
+            else:
+                largest[d] = cur
+
+        else:
+            if largest[2] is not None:
+                # print(largest)
+                return largest
+
 
 
     def isNumPointsConst(self):
@@ -241,12 +264,20 @@ class TreeControl():
 
         with open(path, 'w+') as openFile:
 
-            for n in self.bestNodes[:num]:
+            for b in self.findLargestNonEmpty():
+                x = b.dim[0]
+                y = b.dim[1]
+                z = b.dim[2]
+
+                line = ('KARTON %s,%s,%s,%s,\n') % (b.id,x,y,z)
+                openFile.write(line)
+
+            for n in self.bestNodes[:num-3]:
                 x = n[1].dim[0]
                 y = n[1].dim[1]
                 z = n[1].dim[2]
 
-                line = ('KARTON %s,%s,%s,%s,%s,\n') % (n[0],n[2],x,y,z)
+                line = ('KARTON %s,%s,%s,%s,\n') % (n[0],x,y,z)
                 openFile.write(line)
 
 
@@ -261,7 +292,8 @@ class TreeControl():
 
         print('Number of Points:\t\t\t%i' % len(self.itemBoxes))
         print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
-        print('Initial total Volume:\t\t%.4e' % self.initialTotalVolume)
+        print('Initial total ItemVolume:\t%.4e' % self.initialTotalItemVolume)
+        print('Initial total BoxVolume:\t%.4e' % self.initialTotalBoxVolume)
         print('Initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
         print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
 

@@ -29,7 +29,9 @@ def boxes_from_file(fn):
     
     data = []
     for d in _d:
-        data.append([d[0], [int(x) for x in d[1:4]]])
+        ddim = [int(x) for x in d[1:4]]
+        if len(ddim) == 3:
+            data.append([d[0], ddim])
 
     return data
 
@@ -143,7 +145,7 @@ def main(*args):
     # pprint([x.log() for x in new_containers])
     pprint('-----------------------')
     # pprint([x.log() for x in old_containers])
-    
+    # item_total_volume = sum([it.volume for it in test_data_items])
     old_total_volume = sum([x.volume * len(x.items) for x in re_old])
     new_total_volume = sum([x.volume * len(x.items) for x in re_new])
     check_new_total_volume = sum([len(x.items) for x in re_new])
