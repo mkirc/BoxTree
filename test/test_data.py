@@ -1,10 +1,14 @@
 
-# checks for wrong lines in file
-def test_filter(fn):
+def read_file(fn):
     file = open(fn, 'r')
     _d = [x.split(',') for x in file.read().split('\n')]
     file.close()
 
+    return _d
+# checks for wrong lines in file
+def test_filter(fn):
+    
+    _d = read_file(fn)
     data = []
     for d in _d:
         if 'SPEDI' in d[0]:
@@ -27,8 +31,17 @@ def test_filter(fn):
     return True
 
 
+def test_sizes(fn):
+    _d = read_file(fn)
+
+    for d in _d:
+        box = sorted([int(x) for x in d[1:4]])
+        item = sorted([int(x) for x in d[4:7]])
 
 
+        # make sure item < box
+
+        
 
 
 def test(fn):

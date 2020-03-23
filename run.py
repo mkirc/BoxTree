@@ -6,7 +6,7 @@ def run():
     divCrit = 0.5
     startAxis = 0
     MaxNumPoints = None
-    inPath = 'assets/1M_old.csv'
+    inPath = 'assets/data_old_biggest_01.csv'
     outPath = 'assets/candidates.csv'
     plotPath = 'assets/plots/best30.jpg'
 
@@ -30,7 +30,7 @@ def run():
     t.writeNewBoxesCSV(outPath)
 
     t.printInfo(extended=False,leaves=False)
-    t.plotBest(30, plotPath)
+    # t.plotBest(30, plotPath)
 
 
 run()
