@@ -156,7 +156,8 @@ class TreeControl():
 
         self.ibf = ItemBoxFactory()
         self.initialTotalDeadVolume = 0
-        self.initialTotalVolume = 0
+        self.initialTotalBoxVolume = 0
+        self.initialTotalItemVolume = 0
         self.endTotalVolume = 0
         self.writer = Writer()
         self.itemBoxes = []
@@ -180,9 +181,9 @@ class TreeControl():
 
     def getInitialValues(self):
 
-        self.initialTotalVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
-        self.initialTotalDeadVolume = (np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
-                                       - self.initialTotalVolume)
+        self.initialTotalItemVolume = np.sum([b[0].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalBoxVolume = np.sum([b[1].vol for b in self.itemBoxes],dtype=np.int64)
+        self.initialTotalDeadVolume = (self.initialTotalBoxVolume - self.initialTotalItemVolume)
 
     def getDeltaVs(self, bestN=None):
 
@@ -201,10 +202,28 @@ class TreeControl():
         
         for mvp in self.getDeltaVs():
             dV, n = mvp
-            self.bestNodes.append((n.id, n, dV))
-            if dV == 0:
-                break
+            if len(n.points) > 0:
+                self.bestNodes.append((n, dV))
+                if dV == 0:
+                    break
         return
+
+    def findLargestNonEmpty(self):
+
+        largest = [None, None, None]
+        nonempty = []
+
+        for n in self.tree.leaves:
+            if len(n.points) > 0:
+                nonempty.append(n)
+
+        print(len(sorted(nonempty, key=lambda n:n.deltaV)))
+
+        for d in range(0, 3):
+            largest[d] = sorted(nonempty, key=lambda n:n.dim[d], reverse=True)[0]
+        return largest
+
+
 
 
     def isNumPointsConst(self):
@@ -235,19 +254,34 @@ class TreeControl():
     #     print('start writing...')
     #     self.writer.write(path, bestNodesCopy, self.tree.leaves)
 
-    def writeNewBoxesCSV(self, path):
+    def writeNewBoxesCSV(self, num, path, plot=False, plotPath=None):
 
         print('writing new: %s' % (path))
 
         with open(path, 'w+') as openFile:
 
-            for n in self.bestNodes:
-                x = n[1].dim[0]
-                y = n[1].dim[1]
-                z = n[1].dim[2]
+            for n in self.bestNodes[:num]:
+                x = n[0].dim[0]
+                y = n[0].dim[1]
+                z = n[0].dim[2]
 
-                line = ('KARTON %s,%s,%s,%s,%s,\n') % (n[0],n[2],x,y,z)
+                line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
                 openFile.write(line)
+            
+            else:
+                # x = self.bestNodes[-1][0].dim[0]
+                # y = self.bestNodes[-1][0].dim[1]
+                # z = self.bestNodes[-1][0].dim[2]
+                # line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
+                end = self.tree.root
+                line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
+                openFile.write(line)
+
+        if plot:
+            if plotPath is not None:
+                candidates = [n[1] for n in self.bestNodes[:num]]
+                candidates.append(self.bestNodes[-1][1])
+                self.writer.plot(candidates, plotPath)
 
 
     def getNewValues(self):
@@ -261,7 +295,8 @@ class TreeControl():
 
         print('Number of Points:\t\t\t%i' % len(self.itemBoxes))
         print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
-        print('Initial total Volume:\t\t%.4e' % self.initialTotalVolume)
+        print('Initial total ItemVolume:\t%.4e' % self.initialTotalItemVolume)
+        print('Initial total BoxVolume:\t%.4e' % self.initialTotalBoxVolume)
         print('Initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
         print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
 
@@ -286,15 +321,6 @@ class TreeControl():
             for n in self.tree.leaves:
                 print(n.id, n.dim, n.lastCut)
 
-        if bestN:
+        if len(self.bestNodes) > 0:
 
             print(' Leaves with deltaV gain:    %i' % (len(self.bestNodes)))
-            
-            if bestN > 0:
-                w = Writer()
-                w.plot([n[2] for n in self.bestNodes[:bestN]])
-
-        # print('')
-        # print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
-        # print('new total DeadVolume:\t\t%.4e' % self.newTotalDeadVolume)
-        # print('Thats like...%.3f of the initial!' % self.gain)
