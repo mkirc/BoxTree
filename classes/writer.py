@@ -7,12 +7,17 @@ class Writer():
 
         pass
 
-    def plot(self, nodeVolList):
+    def plot(self, nodeVolList, path, show=False):
 
             fig, ax = plt.subplots()
-            ax.plot(nodeVolList)
+            ax.plot(nodeVolList, marker='x')
+            ax.set_xlabel('index in Treecontrol.bestNodes')
+            ax.set_ylabel('Node.deltaV')
             # ax.set_yscale('log')
-            plt.show()
+            if show:
+                plt.show()
+            else:
+                plt.savefig(path)
 
     def write(self, path, bestNodesCopy, leaves):
         '''conceptually wrong, should be avoided'''

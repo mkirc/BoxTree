@@ -7,7 +7,8 @@ def run():
     startAxis = 0
     MaxNumPoints = None
     inPath = 'assets/1M_old.csv'
-    outPath = 'assets/kandidates.csv'
+    outPath = 'assets/candidates.csv'
+    plotPath = 'assets/plots/best30.jpg'
 
     t = TreeControl()
     t.getInitialItemBoxes(inPath, MaxNumPoints)
@@ -28,7 +29,8 @@ def run():
 
     t.writeNewBoxesCSV(outPath)
 
-    t.printInfo(extended=False,leaves=False ,bestN=30)
+    t.printInfo(extended=False,leaves=False)
+    t.plotBest(30, plotPath)
 
 
 run()

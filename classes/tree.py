@@ -286,13 +286,14 @@ class TreeControl():
             for n in self.tree.leaves:
                 print(n.id, n.dim, n.lastCut)
 
-        if bestN:
+        if len(self.bestNodes) > 0:
 
             print(' Leaves with deltaV gain:    %i' % (len(self.bestNodes)))
-            
-            if bestN > 0:
-                w = Writer()
-                w.plot([n[2] for n in self.bestNodes[:bestN]])
+
+    def plotBest(self, num, path, show=False):
+
+        w = Writer()
+        w.plot([n[2] for n in self.bestNodes[:num]], path, show)
 
         # print('')
         # print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
