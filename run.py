@@ -5,18 +5,19 @@ def run():
     depth = 13
     divCrit = 0.5
     startAxis = 0
-    numPoints = 47287
-    newPath = 'assets/new_boxes_86.csv'
+    MaxNumPoints = None
+    inPath = 'assets/1M_old.csv'
+    outPath = 'assets/kandidates.csv'
 
     t = TreeControl()
-    t.getInitialItemBoxes('assets/raw_data_01.csv')
+    t.getInitialItemBoxes(inPath, MaxNumPoints)
 
     t.getInitialValues()
 
     t.initializeTree(depth, divCrit, startAxis)
+    
     p = [i[0] for i in t.itemBoxes]
-    t.tree.insert(p[0:numPoints])
-
+    t.tree.insert(p)
 
     t.tree.grow()
 
@@ -25,12 +26,9 @@ def run():
 
     t.getBestNodes()
 
-    t.writeOutNewItemBoxes(newPath)
+    t.writeNewBoxesCSV(outPath)
 
-    t.getNewItemBoxes(newPath)
-    t.getNewValues()
-
-    t.printInfo(numPoints, bestN=True)
+    t.printInfo(extended=False,leaves=False ,bestN=30)
 
 
 run()

@@ -48,7 +48,7 @@ class ItemBoxFactory():
         self.itemBoxes = []
 
     def loadCSV(self, path):
-
+        print('loading points from %s' % (path))
         with open(path) as openFile:
             for line in openFile:
                 self.parse(line)
@@ -64,9 +64,12 @@ class ItemBoxFactory():
 
         return self.itemBoxes.append([item, box])
 
-    def getItemBoxes(self):
+    def getItemBoxes(self, numPoints=None):
 
-        return self.itemBoxes
+        if numPoints is not None:
+            return self.itemBoxes[:numPoints]
+        else:
+            return self.itemBoxes
 
     def reset(self):
 
