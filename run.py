@@ -26,10 +26,9 @@ def run():
     t.isNumPointsConst()
 
     t.getBestNodes()
-    t.writeNewBoxesCSV(30, outPath)
+    t.writeNewBoxesCSV(25, outPath, plot=False, plotPath=plotPath)
 
     t.printInfo(extended=False,leaves=False)
-    # t.plotBest(30, plotPath)
 
 
 run()

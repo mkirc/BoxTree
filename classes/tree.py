@@ -202,31 +202,27 @@ class TreeControl():
         
         for mvp in self.getDeltaVs():
             dV, n = mvp
-            self.bestNodes.append((n.id, n, dV))
-            if dV == 0:
-                break
+            if len(n.points) > 0:
+                self.bestNodes.append((n, dV))
+                if dV == 0:
+                    break
         return
 
     def findLargestNonEmpty(self):
 
         largest = [None, None, None]
+        nonempty = []
+
+        for n in self.tree.leaves:
+            if len(n.points) > 0:
+                nonempty.append(n)
+
+        print(len(sorted(nonempty, key=lambda n:n.deltaV)))
 
         for d in range(0, 3):
-            cur = None
-            for n in self.tree.leaves:
-                if len(n.points) > 0:
-                    if cur is None:
-                        cur = n
-                    elif n.dim[d] > cur.dim[d]:
-                        largest[d] = n
-                        break
-            else:
-                largest[d] = cur
+            largest[d] = sorted(nonempty, key=lambda n:n.dim[d], reverse=True)[0]
+        return largest
 
-        else:
-            if largest[2] is not None:
-                # print(largest)
-                return largest
 
 
 
@@ -258,27 +254,34 @@ class TreeControl():
     #     print('start writing...')
     #     self.writer.write(path, bestNodesCopy, self.tree.leaves)
 
-    def writeNewBoxesCSV(self, num, path):
+    def writeNewBoxesCSV(self, num, path, plot=False, plotPath=None):
 
         print('writing new: %s' % (path))
 
         with open(path, 'w+') as openFile:
 
-            for b in self.findLargestNonEmpty():
-                x = b.dim[0]
-                y = b.dim[1]
-                z = b.dim[2]
+            for n in self.bestNodes[:num]:
+                x = n[0].dim[0]
+                y = n[0].dim[1]
+                z = n[0].dim[2]
 
-                line = ('KARTON %s,%s,%s,%s,\n') % (b.id,x,y,z)
+                line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
+                openFile.write(line)
+            
+            else:
+                # x = self.bestNodes[-1][0].dim[0]
+                # y = self.bestNodes[-1][0].dim[1]
+                # z = self.bestNodes[-1][0].dim[2]
+                # line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
+                end = self.tree.root
+                line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
                 openFile.write(line)
 
-            for n in self.bestNodes[:num-3]:
-                x = n[1].dim[0]
-                y = n[1].dim[1]
-                z = n[1].dim[2]
-
-                line = ('KARTON %s,%s,%s,%s,\n') % (n[0],x,y,z)
-                openFile.write(line)
+        if plot:
+            if plotPath is not None:
+                candidates = [n[1] for n in self.bestNodes[:num]]
+                candidates.append(self.bestNodes[-1][1])
+                self.writer.plot(candidates, plotPath)
 
 
     def getNewValues(self):
@@ -321,13 +324,3 @@ class TreeControl():
         if len(self.bestNodes) > 0:
 
             print(' Leaves with deltaV gain:    %i' % (len(self.bestNodes)))
-
-    def plotBest(self, num, path, show=False):
-
-        w = Writer()
-        w.plot([n[2] for n in self.bestNodes[:num]], path, show)
-
-        # print('')
-        # print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
-        # print('new total DeadVolume:\t\t%.4e' % self.newTotalDeadVolume)
-        # print('Thats like...%.3f of the initial!' % self.gain)
