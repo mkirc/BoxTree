@@ -1,4 +1,5 @@
 
+import matplotlib.pyplot as plt
 
 class Writer():
 
@@ -6,7 +7,20 @@ class Writer():
 
         pass
 
+    def plot(self, nodeVolList, path, show=False):
+
+            fig, ax = plt.subplots()
+            ax.plot(nodeVolList, marker='x')
+            ax.set_xlabel('index in Treecontrol.bestNodes')
+            ax.set_ylabel('Node.deltaV')
+            # ax.set_yscale('log')
+            if show:
+                plt.show()
+            else:
+                plt.savefig(path)
+
     def write(self, path, bestNodesCopy, leaves):
+        '''conceptually wrong, should be avoided'''
 
         with open(path, 'w+') as openFile:
             for l in leaves:
@@ -55,3 +69,5 @@ class Writer():
                 print('finished writing %s' % (path))
                 print('')
                 return
+
+

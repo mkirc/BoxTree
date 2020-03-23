@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from classes.point import Point, ItemBoxFactory
 from classes.writer import Writer
@@ -14,23 +15,34 @@ class kdTree():
         self.axis = startAxis
         self.divCrit = divCrit
         self.root = Node(None)
-        self.root.dim = [1290, 360, 590]
+        self.root.dim = [0, 0, 0]
+        self.root.lastCut = [0, 0, 0]
         self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
         self.leaves = []
 
     def insert(self, points):
 
         self.root.points = points
+        self.getMaxOfAllDim()
+
+        print('points inserted.')
 
     def grow(self):
 
+        print('growing tree...')
         self.root.split(self.maxDepth, self.axis, self.divCrit)
 
         self.getLeaves()
 
         self.breathFirstWalk()
 
-        print('finished tree groth.')
+        print('tree groth finished.')
+
+    def getMaxOfAllDim(self):
+
+        for i in range(0, 3):
+            self.root.dim[i] = max([p.dim[i] for p in self.root.points])
+        return
 
 
     def getLeaves(self):
@@ -74,15 +86,9 @@ class Node():
         self.parent = parent
         self.points = []
         self.dim = []
+        self.lastCut = None
         self.vol = None
         self.deltaV = 0
-
-
-    def getMax(self, axis):
-
-        cur_max = max([p.dim[axis] for p in self.points])
-
-        return cur_max
 
     def getLeaves(self):
 
@@ -108,12 +114,14 @@ class Node():
         if self.isLeaf:
             if depth > 0:
                 self.leftChild = Node(self)
+                self.leftChild.lastCut = [i for i in self.lastCut]
                 self.rightChild = Node(self)
+                self.rightChild.lastCut = [i for i in self.lastCut]
                 self.isLeaf = False
                 self.leftChild.depth += 1
                 self.rightChild.depth += 1
                 try:
-                    divisor = int(divCrit * self.getMax(axis))
+                    divisor = int(divCrit * (self.dim[axis] - self.lastCut[axis])) + self.lastCut[axis]
                 except ValueError:
                     # enter smart error handling here
                     # only happens when the leaf of interest is empty
@@ -126,12 +134,11 @@ class Node():
                         self.rightChild.points.append(point)
                 
                 
-                # self.leftChild.dim = copy.deepcopy(self.dim)
                 self.leftChild.dim = [int(i) for i in self.dim]
                 self.leftChild.dim[axis] = divisor
                 self.leftChild.calculateVolume()
                 self.leftChild.calculateDeltaV()
-                # self.rightChild.dim = copy.deepcopy(self.dim)
+                self.rightChild.lastCut[axis] = divisor
                 self.rightChild.dim = [int(i) for i in self.dim]
                 self.rightChild.calculateVolume()
                 self.rightChild.deltaV = self.deltaV
@@ -147,13 +154,10 @@ class TreeControl():
 
     def __init__(self):
 
-        # self.pf = PointFactory()
         self.ibf = ItemBoxFactory()
         self.initialTotalDeadVolume = 0
         self.initialTotalVolume = 0
         self.endTotalVolume = 0
-        # self.pf.loadPoints(path)
-        # self.itemBoxes = self.pf.getItemBoxes()
         self.writer = Writer()
         self.itemBoxes = []
         self.tree = None
@@ -163,10 +167,10 @@ class TreeControl():
         self.newTotalVolume = 0
         self.gain = 0
 
-    def getInitialItemBoxes(self, path):
+    def getInitialItemBoxes(self, path, numPoints=None):
 
         self.ibf.loadCSV(path)
-        self.itemBoxes = self.ibf.getItemBoxes()
+        self.itemBoxes = self.ibf.getItemBoxes(numPoints)
         self.ibf.reset()
 
 
@@ -216,34 +220,49 @@ class TreeControl():
         print('')
         return
 
-    def getNewItemBoxes(self, path):
+    # def getNewItemBoxes(self, path):
 
-        self.ibf.loadCSV(path)
-        self.newItemBoxes = self.ibf.getItemBoxes()
-        self.ibf.reset()
-    def writeOutNewItemBoxes(self, path):
+    #     self.ibf.loadCSV(path)
+    #     self.newItemBoxes = self.ibf.getItemBoxes()
+    #     self.ibf.reset()
 
-        self.tree.leaves.sort(key=lambda node: node.id)
-        bestNodesCopy = [i for i in self.bestNodes]
-        bestNodesCopy.sort(key=lambda tup: tup[0])
+    # def writeOutNewItemBoxes(self, path):
 
-        print('start writing...')
-        self.writer.write(path, bestNodesCopy, self.tree.leaves)
+    #     self.tree.leaves.sort(key=lambda node: node.id)
+    #     bestNodesCopy = [i for i in self.bestNodes]
+    #     bestNodesCopy.sort(key=lambda tup: tup[0])
+
+    #     print('start writing...')
+    #     self.writer.write(path, bestNodesCopy, self.tree.leaves)
+
+    def writeNewBoxesCSV(self, path):
+
+        print('writing new: %s' % (path))
+
+        with open(path, 'w+') as openFile:
+
+            for n in self.bestNodes:
+                x = n[1].dim[0]
+                y = n[1].dim[1]
+                z = n[1].dim[2]
+
+                line = ('KARTON %s,%s,%s,%s,%s,\n') % (n[0],n[2],x,y,z)
+                openFile.write(line)
+
 
     def getNewValues(self):
 
-        # self.pf.loadPoints(path, new=True)
-        # self.newItemBoxes = self.pf.getNewItemBoxes()
         self.newTotalVolume = np.sum([b[0].vol for b in self.newItemBoxes],dtype=np.int64)
         self.newTotalDeadVolume = (np.sum([b[1].vol for b in self.newItemBoxes],dtype=np.int64)
                                    - self.newTotalVolume)
         self.gain = self.newTotalDeadVolume / self.initialTotalDeadVolume
 
-    def printInfo(self, numPoints, extended=False, bestN=False):
+    def printInfo(self, extended=False,leaves=False ,bestN=False):
 
-        print('Number of Points:\t\t\t%i' % numPoints)
-        print('initial total Volume:\t\t%.4e' % self.initialTotalVolume)
-        print('initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
+        print('Number of Points:\t\t\t%i' % len(self.itemBoxes))
+        print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
+        print('Initial total Volume:\t\t%.4e' % self.initialTotalVolume)
+        print('Initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
         print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
 
         
@@ -261,12 +280,22 @@ class TreeControl():
                 else:
                     print(n[0],n[1] , " ", end = '')
             print('')
+            print('Leave Dimensions:')
 
-        if bestN:
+        if leaves:
+            for n in self.tree.leaves:
+                print(n.id, n.dim, n.lastCut)
+
+        if len(self.bestNodes) > 0:
 
             print(' Leaves with deltaV gain:    %i' % (len(self.bestNodes)))
 
-        print('')
-        print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
-        print('new total DeadVolume:\t\t%.4e' % self.newTotalDeadVolume)
-        print('Thats like...%.3f of the initial!' % self.gain)
+    def plotBest(self, num, path, show=False):
+
+        w = Writer()
+        w.plot([n[2] for n in self.bestNodes[:num]], path, show)
+
+        # print('')
+        # print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
+        # print('new total DeadVolume:\t\t%.4e' % self.newTotalDeadVolume)
+        # print('Thats like...%.3f of the initial!' % self.gain)
