@@ -19,6 +19,20 @@ def parse_result(fn):
     # pprint(data[:-1])
     return data[:-1]
 
+def boxes_from_file(fn):
+
+    # file = open('data_r_01.csv', 'r')
+    file = open(fn, 'r')
+    _d = [x.split(',') for x in file.read().split('\n')]
+    file.close()
+    # pprint(_d)
+    
+    data = []
+    for d in _d:
+        data.append([d[0], [int(x) for x in d[1:4]]])
+
+    return data
+
 
 def parse_test_data(fn):
     file = open(fn, 'r')
@@ -66,23 +80,31 @@ def repack(container, items):
 
 def main(*args):
 
-    res_data = parse_result(args[0])
+    # res_data = parse_result(args[0])
 
-    pprint(res_data[0])
-    pprint(len(res_data))
+    _boxes = boxes_from_file(args[0])
 
-    _packages = {}
-    for r in res_data:
-        if r[0] not in _packages:
-            _packages[r[0]] = r[1]
+    # pprint(res_data[0])
+    # pprint(len(res_data))
 
-    # pprint(_packages)
-    # pprint(len(_packages))
+    # _packages = {}
+    # for r in res_data:
+    #     if r[0] not in _packages:
+    #         _packages[r[0]] = r[1]
+
+    # # pprint(_packages)
+    # # pprint(len(_packages))
+
+    # new_containers = []
+    # for n, dim in _packages.items():
+    #     _c = Container(dim)
+    #     _c.name = n
+    #     new_containers.append(_c)
 
     new_containers = []
-    for n, dim in _packages.items():
-        _c = Container(dim)
-        _c.name = n
+    for p in _boxes:
+        _c = Container(p[1])
+        _c.name = p[0]
         new_containers.append(_c)
 
     # pprint([str(c) for c in containers])
@@ -177,7 +199,7 @@ def main(*args):
     pprint([x.log() for x in re_old])
 
 
-result_file = '../assets/new_boxes_86.csv'
+result_file = '../assets/candidates.csv'
 # data_file = '../assets/data_new_biggest_01.csv'
 data_file = '../assets/data_old_biggest_01.csv'
 
