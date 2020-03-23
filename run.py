@@ -6,10 +6,11 @@ def run():
     divCrit = 0.5
     startAxis = 0
     MaxNumPoints = None
-    newPath = 'assets/new_boxes.csv'
+    inPath = 'assets/1M_old.csv'
+    outPath = 'assets/kandidates.csv'
 
     t = TreeControl()
-    t.getInitialItemBoxes('assets/47k.csv', MaxNumPoints)
+    t.getInitialItemBoxes(inPath, MaxNumPoints)
 
     t.getInitialValues()
 
@@ -25,13 +26,9 @@ def run():
 
     t.getBestNodes()
 
-    # t.writeOutNewItemBoxes(newPath)
-    t.writeNewBoxesCSV(newPath)
+    t.writeNewBoxesCSV(outPath)
 
-    # t.getNewItemBoxes(newPath)
-    # t.getNewValues()
-
-    t.printInfo(extended=False, bestN=True)
+    t.printInfo(extended=False,leaves=False ,bestN=30)
 
 
 run()

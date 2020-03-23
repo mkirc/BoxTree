@@ -234,44 +234,42 @@ Just cd into the root and run it like
 ```bash
 python3 run.py
 ```
-The csv format is not really standard, basically Name,Box.x,Box.y,Box.z,Item.x,Item.y,Item.z,\n
-
+The csv format is not really standard, basically 
+```
+Name,Box.x,Box.y,Box.z,Item.x,Item.y,Item.z,\n
+```
 Maybe when we start to care for proper .csv implementation this can change.
 
 Here is an explanation of run.py.
 ```python
 from classes.tree import TreeControl
 
-depth = 13 # defines depth of tree, obviously
-divCrit = 0.5 # tweaks the discriminant, normally set to 0.5, but you know, its your choice
-startAxis = 0 # pretty much self explanatory
-numPoints = 47287 	# mostly for testing, normally you just want to churn all of them
-p = [i[0] for i in t.itemBoxes] 
-
-newPath = 'assets/your.csv' # but you could really pick any path you like
+depth = 13
+divCrit = 0.5	# tweaks the discriminant, normally set to 0.5, but you know, its your choice
+startAxis = 0	# pretty much self explanatory
+MaxNumPoints = None 	# cap of your points you want to partition 
+inPath = 'assets/1M_old.csv'
+outPath = 'assets/kandidates.csv'
 
 t = TreeControl()
-t.getInitialItemBoxes('assets/your_new.csv') # same same
-t.getInitialValues()
+t.getInitialItemBoxes(inPath, MaxNumPoints)
+
+t.getInitialValues()	# calculates initial total Volume, and Death Volume
 
 t.initializeTree(depth, divCrit, startAxis)
 
-t.tree.insert(p[0:numPoints])
-
+p = [i[0] for i in t.itemBoxes]
+t.tree.insert(p)
 
 t.tree.grow()
 
-t.isNumPointsConst() # sanity check
+t.isNumPointsConst()	# sanity check
 
-t.getBestNodes()
-# i know its not really necessary to write them out as csv, but i think its
-# handy for comparison and whatnot
-t.writeOutNewItemBoxes(newPath)
-# this is really an artifact of the design decision above
-t.getNewItemBoxes(newPath)
-t.getNewValues()
+t.getBestNodes() # retrieves Nodes with positive ∆V,d. one can access them via TreeControl.bestNodes
 
-t.printInfo(numPoints, bestN=True) # here comes the juice
+t.writeNewBoxesCSV(outPath)	
+
+t.printInfo(extended=False,leaves=False ,bestN=30)
 ```
 
 ## Todo

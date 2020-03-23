@@ -7,11 +7,11 @@ class Writer():
 
         pass
 
-    def plot(self, nodeList):
+    def plot(self, nodeVolList):
 
             fig, ax = plt.subplots()
-            ax.plot(nodeList)
-            ax.set_yscale('log')
+            ax.plot(nodeVolList)
+            # ax.set_yscale('log')
             plt.show()
 
     def write(self, path, bestNodesCopy, leaves):

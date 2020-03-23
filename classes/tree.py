@@ -257,7 +257,7 @@ class TreeControl():
                                    - self.newTotalVolume)
         self.gain = self.newTotalDeadVolume / self.initialTotalDeadVolume
 
-    def printInfo(self, extended=False, bestN=False):
+    def printInfo(self, extended=False,leaves=False ,bestN=False):
 
         print('Number of Points:\t\t\t%i' % len(self.itemBoxes))
         print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
@@ -282,15 +282,17 @@ class TreeControl():
             print('')
             print('Leave Dimensions:')
 
+        if leaves:
             for n in self.tree.leaves:
                 print(n.id, n.dim, n.lastCut)
 
         if bestN:
 
             print(' Leaves with deltaV gain:    %i' % (len(self.bestNodes)))
-
-            w = Writer()
-            w.plot([i[2] for i in self.bestNodes])
+            
+            if bestN > 0:
+                w = Writer()
+                w.plot([n[2] for n in self.bestNodes[:bestN]])
 
         # print('')
         # print('new total Volume:\t\t\t%.4e' % self.newTotalVolume)
