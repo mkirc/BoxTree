@@ -27,7 +27,7 @@ def run():
 
     t.getBestNodes()
 
-    t.writeNewBoxesCSV(outPath)
+    t.writeNewBoxesCSV(30, outPath)
 
     t.printInfo(extended=False,leaves=False)
     # t.plotBest(30, plotPath)
