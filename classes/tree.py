@@ -235,13 +235,13 @@ class TreeControl():
     #     print('start writing...')
     #     self.writer.write(path, bestNodesCopy, self.tree.leaves)
 
-    def writeNewBoxesCSV(self, path):
+    def writeNewBoxesCSV(self, num, path):
 
         print('writing new: %s' % (path))
 
         with open(path, 'w+') as openFile:
 
-            for n in self.bestNodes:
+            for n in self.bestNodes[:num]:
                 x = n[1].dim[0]
                 y = n[1].dim[1]
                 z = n[1].dim[2]
