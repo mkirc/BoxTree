@@ -30,7 +30,8 @@ class kdTree():
     def grow(self):
 
         print('growing tree...')
-        self.root.split(self.maxDepth, self.axis, self.divCrit)
+        # self.root.split(self.maxDepth, self.axis, self.divCrit)
+        self.root.splitByMax(self.maxDepth, self.axis, self.divCrit)
 
         self.getLeaves()
 
@@ -108,6 +109,64 @@ class Node():
 
         # look at the README for explanation
         self.deltaV = len(self.points) * (self.parent.vol - self.vol)
+
+    def getMax(self, axis):
+
+        curMax = max([p.dim[axis] for p in self.points])
+
+        return curMax
+
+    def splitByMax(self, depth, axis, divCrit):
+
+        if self.isLeaf:
+            if depth > 0:
+                self.leftChild = Node(self)
+                self.leftChild.lastCut = [i for i in self.lastCut]
+                self.rightChild = Node(self)
+                self.rightChild.lastCut = [i for i in self.lastCut]
+                self.isLeaf = False
+                self.leftChild.depth += 1
+                self.rightChild.depth += 1
+                try:
+                    divisor = int(divCrit * (self.getMax(axis) - self.lastCut[axis])) + self.lastCut[axis]
+                except ValueError:
+                    # enter smart error handling here
+                    # only happens when the leaf of interest is empty
+                    divisor = 0
+
+                for point in self.points:
+                    if point.dim[axis] < divisor:
+                        self.leftChild.points.append(point)
+                    else:
+                        self.rightChild.points.append(point)
+                
+                
+                self.leftChild.dim = [int(i) for i in self.dim]
+                self.rightChild.dim = [int(i) for i in self.dim]
+                try:
+                    self.rightChild.dim[axis] = self.getMax(axis)
+                except ValueError:
+                    self.rightChild.dim[axis] = divisor
+
+                try:
+                    self.leftChild.dim[axis] = self.getMax(axis)
+                except ValueError:
+                    self.leftChild.dim[axis] = divisor
+
+                self.leftChild.calculateVolume()
+                self.leftChild.calculateDeltaV()
+                self.rightChild.lastCut[axis] = divisor
+                
+
+                self.rightChild.calculateVolume()
+                self.rightChild.deltaV = self.deltaV
+
+                depth = depth - 1
+                axis = (axis + 1) % 3
+                
+
+                self.leftChild.split((depth), axis, divCrit)
+                self.rightChild.split((depth), axis, divCrit)
 
     def split(self, depth, axis, divCrit):
 
@@ -208,22 +267,20 @@ class TreeControl():
                     break
         return
 
-    def findLargestNonEmpty(self):
+    # def findLargestNonEmpty(self):
 
-        largest = [None, None, None]
-        nonempty = []
+    #     largest = [None, None, None]
+    #     nonempty = []
 
-        for n in self.tree.leaves:
-            if len(n.points) > 0:
-                nonempty.append(n)
+    #     for n in self.tree.leaves:
+    #         if len(n.points) > 0:
+    #             nonempty.append(n)
 
-        print(len(sorted(nonempty, key=lambda n:n.deltaV)))
+    #     print(len(sorted(nonempty, key=lambda n:n.deltaV)))
 
-        for d in range(0, 3):
-            largest[d] = sorted(nonempty, key=lambda n:n.dim[d], reverse=True)[0]
-        return largest
-
-
+    #     for d in range(0, 3):
+    #         largest[d] = sorted(nonempty, key=lambda n:n.dim[d], reverse=True)[0]
+    #     return largest
 
 
     def isNumPointsConst(self):
