@@ -8,6 +8,9 @@ from classes.writer import Writer
 class kdTree():
 
     TREE_INFO = []
+    LEAVES = []
+    TDV = 0
+    ROOT = None
 
     def __init__(self, depth, divCrit, startAxis):
 
@@ -19,6 +22,7 @@ class kdTree():
         self.root.dim = [0, 0, 0]
         self.root.lastCut = [0, 0, 0]
         self.leaves = []
+        self.dVol = 0
 
     def insert(self, points):
 
@@ -35,6 +39,10 @@ class kdTree():
             self.root.split(self.maxDepth, self.axis, self.divCrit, dVMode)
         elif splitMode == 1:
             self.root.splitByMax(self.maxDepth, self.axis, self.divCrit, dVMode)
+        elif splitMode == 2:
+            kdTree.ROOT = self.root
+            print('  ...respecting objective criteria!')
+            self.root.splitByObjectiveFunction(self.maxDepth, self.axis)
         elif splitMode == -1:
             self.root.splitRandom(self.maxDepth, self.axis, dVMode)
 
@@ -106,14 +114,15 @@ class Node():
         self.dim = []
         self.lastCut = None
         self.vol = None
-        self.deltaV = 0
+        self.deltaV = 0        
 
     def getLeaves(self):
 
-        
         if self.isLeaf:
             # print('leave')
             yield self
+        if not self.rightChild and not self.leftChild:
+            pass
         else:
             yield from self.rightChild.getLeaves()
             yield from self.leftChild.getLeaves()   
@@ -156,6 +165,87 @@ class Node():
         dVol = (self.vol * len(self.points)) - pVol
         return dVol
 
+    def getNegTotalDeathVolume(self, lc, rc):
+
+        kdTree.LEAVES = [n for n in kdTree.ROOT.getLeaves()]
+        kdTree.LEAVES.append(lc)
+        kdTree.LEAVES.append(rc)
+        itVol = 0
+        nVol = 0
+        dVol = 0
+
+        for n in kdTree.LEAVES:
+            itVol += np.sum([p.vol for p in n.points], dtype=np.int64)
+            nVol += n.vol * len(n.points)
+        dVol = nVol - itVol
+        for i in range(2):
+            kdTree.LEAVES.pop()
+        return dVol
+
+
+    def splitByObjectiveFunction(self, depth, axis):
+
+        if self.isLeaf:
+            if depth > 0:
+                curLeft = None
+                curRight = None
+                self.isLeaf = False
+
+                for dc in range(30, 81):
+                    leftChild = Node(self)
+                    rightChild = Node(self)
+                    leftChild.lastCut = [i for i in self.lastCut]
+                    rightChild.lastCut = [i for i in self.lastCut]
+                    try:
+                        divisor = int((dc / 100) * (self.dim[axis] - self.lastCut[axis])) + self.lastCut[axis]
+                    except ValueError:
+                        # enter smart error handling here
+                        # only happens when the leaf of interest is empty
+                        divisor = 0
+
+                    for point in self.points:
+                        if point.dim[axis] < divisor:
+                            leftChild.points.append(point)
+                        else:
+                            rightChild.points.append(point)
+
+
+                    leftChild.dim = [int(i) for i in self.dim]
+                    leftChild.dim[axis] = divisor
+                    leftChild.calculateVolume()
+                    rightChild.lastCut[axis] = divisor
+                    rightChild.dim = [int(i) for i in self.dim]
+                    rightChild.calculateVolume()
+
+                    tdv = self.getNegTotalDeathVolume(leftChild, rightChild)
+
+                    if kdTree.TDV == 0:
+
+                        kdTree.TDV = tdv
+                        curLeft = leftChild
+                        curRight = rightChild
+                    
+                    if kdTree.TDV > tdv:
+
+                        kdTree.TDV = tdv
+                        curLeft = leftChild
+                        curRight = rightChild
+
+                    elif kdTree.TDV < tdv:
+
+                        pass
+                                
+                self.leftChild = curLeft
+                self.rightChild = curRight
+
+                depth = depth - 1
+                axis = (axis + 1) % 3
+
+                self.leftChild.splitByObjectiveFunction(depth, axis)
+                self.rightChild.splitByObjectiveFunction(depth, axis)
+
+
+
 
     def split(self, depth, axis, divCrit, dVMode):
 
@@ -180,8 +270,7 @@ class Node():
                         self.leftChild.points.append(point)
                     else:
                         self.rightChild.points.append(point)
-                
-                
+                                
                 self.leftChild.dim = [int(i) for i in self.dim]
                 self.leftChild.dim[axis] = divisor
                 self.leftChild.calculateVolume()
@@ -193,7 +282,6 @@ class Node():
 
                 depth = depth - 1
                 axis = (axis + 1) % 3
-                
 
                 self.leftChild.split((depth), axis, divCrit, dVMode)
                 self.rightChild.split((depth), axis, divCrit, dVMode)
@@ -352,11 +440,18 @@ class TreeControl():
                     break
         return
 
-    def optimiseBestNodes(self):
+    def optimiseBestNodes(self, leaves=False):
 
-        for n in self.bestNodes:
-            for c in range(0,3):
-                n[0].dim[c] = n[0].getMax(c)
+        if not leaves:
+            for n in self.bestNodes:
+                for c in range(0,3):
+                    n[0].dim[c] = n[0].getMax(c)
+        else:
+            for n in self.tree.leaves:
+                if len(n.points) > 0:
+                    for c in range(0,3):
+                        n.dim[c] = n.getMax(c)
+                    self.bestNodes.append((n, None))
         print('nodes optimised!')
         return
 
@@ -417,16 +512,16 @@ class TreeControl():
                 line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
                 openFile.write(line)
             
-            else:
+            # else:
 
-                # end = self.tree.root
-                # line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
-                # openFile.write(line)
+            #     # end = self.tree.root
+            #     # line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
+            #     # openFile.write(line)
 
-                line68 = 'KARTON 68, 1290, 600, 210,\n'
-                line24 = 'KARTON 24, 1185, 600, 600,\n'
-                openFile.write(line68)
-                openFile.write(line24)
+            #     line68 = 'KARTON 68, 1290, 600, 210,\n'
+            #     line24 = 'KARTON 24, 1185, 600, 600,\n'
+            #     openFile.write(line68)
+            #     openFile.write(line24)
 
 
                 # x = self.bestNodes[-1][0].dim[0]
@@ -457,7 +552,7 @@ class TreeControl():
         print('Dimension of Root:\t\t\t%s' % self.tree.root.dim)
         print('Initial total ItemVolume:\t%.4e' % self.initialTotalItemVolume)
         print('Initial total BoxVolume:\t%.4e' % self.initialTotalBoxVolume)
-        print('Initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
+        print('Initial total DeathVolume:\t%.4e' % self.initialTotalDeadVolume)
         print('Number of Leaves:\t\t%s' % len(self.tree.leaves))
 
         
@@ -478,7 +573,7 @@ class TreeControl():
 
         if leaves:
             print('Leave Dimensions:')
-            for n in self.tree.leaves:
+            for n in self.kdtree.leaves:
                 print(n.id, n.dim, n.lastCut)
 
         if len(self.bestNodes) > 0:
