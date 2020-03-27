@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import random
 from classes.point import Point, ItemBoxFactory
 from classes.writer import Writer
 
@@ -17,21 +18,26 @@ class kdTree():
         self.root = Node(None)
         self.root.dim = [0, 0, 0]
         self.root.lastCut = [0, 0, 0]
-        self.root.vol = self.root.dim[0] * self.root.dim[1] * self.root.dim[2]
         self.leaves = []
 
     def insert(self, points):
 
         self.root.points = points
         self.getMaxOfAllDim()
-
+        self.root.calculateVolume()
         print('points inserted.')
 
-    def grow(self):
+    def grow(self, splitMode=0, dVMode=0):
 
         print('growing tree...')
-        # self.root.split(self.maxDepth, self.axis, self.divCrit)
-        self.root.splitByMax(self.maxDepth, self.axis, self.divCrit)
+        
+        if splitMode == 0:
+            self.root.split(self.maxDepth, self.axis, self.divCrit, dVMode)
+        elif splitMode == 1:
+            self.root.splitByMax(self.maxDepth, self.axis, self.divCrit, dVMode)
+        elif splitMode == -1:
+            self.root.splitRandom(self.maxDepth, self.axis, dVMode)
+
 
         self.getLeaves()
 
@@ -45,6 +51,17 @@ class kdTree():
             self.root.dim[i] = max([p.dim[i] for p in self.root.points])
         return
 
+    def SortPointsByDiag(self):
+
+        diagList = []
+        diagSet = set()
+        for p in self.root.points:
+            q = int(math.sqrt(p.dim[0]**2 + p.dim[1]**2 + p.dim[2]**2))
+            if q not in diagSet:
+                diagSet.add(q)
+                diagList.append((p,q))
+        diagList.sort(reverse=True, key=lambda tup:tup[1])
+        return diagList
 
     def getLeaves(self):
 
@@ -105,10 +122,26 @@ class Node():
 
         self.vol = self.dim[0] * self.dim[1] * self.dim[2]
     
-    def calculateDeltaV(self):
+    def calculateDeltaV(self, dVMode):
 
         # look at the README for explanation
-        self.deltaV = len(self.points) * (self.parent.vol - self.vol)
+        if dVMode == 1:
+            try:
+                rel = (self.parent.vol - self.vol)
+                deltaV = len(self.points) * rel / (len(self.points) * self.parent.vol)
+            except ZeroDivisionError:
+                deltaV = 0
+
+        elif dVMode == 0:
+            deltaV = len(self.points) * (self.parent.vol - self.vol)
+        
+
+        elif dVMode == 2:
+            deltaV = self.calculateLocalDeathVolume()
+
+        return deltaV
+
+
 
     def getMax(self, axis):
 
@@ -116,59 +149,15 @@ class Node():
 
         return curMax
 
-    def splitByMax(self, depth, axis, divCrit):
 
-        if self.isLeaf:
-            if depth > 0:
-                self.leftChild = Node(self)
-                self.leftChild.lastCut = [i for i in self.lastCut]
-                self.rightChild = Node(self)
-                self.rightChild.lastCut = [i for i in self.lastCut]
-                self.isLeaf = False
-                self.leftChild.depth += 1
-                self.rightChild.depth += 1
-                try:
-                    divisor = int(divCrit * (self.getMax(axis) - self.lastCut[axis])) + self.lastCut[axis]
-                except ValueError:
-                    # enter smart error handling here
-                    # only happens when the leaf of interest is empty
-                    divisor = 0
+    def calculateLocalDeathVolume(self):
 
-                for point in self.points:
-                    if point.dim[axis] < divisor:
-                        self.leftChild.points.append(point)
-                    else:
-                        self.rightChild.points.append(point)
-                
-                
-                self.leftChild.dim = [int(i) for i in self.dim]
-                self.rightChild.dim = [int(i) for i in self.dim]
-                try:
-                    self.rightChild.dim[axis] = self.getMax(axis)
-                except ValueError:
-                    self.rightChild.dim[axis] = divisor
+        pVol = np.sum([p.vol for p in self.points], dtype=np.int64)
+        dVol = (self.vol * len(self.points)) - pVol
+        return dVol
 
-                try:
-                    self.leftChild.dim[axis] = self.getMax(axis)
-                except ValueError:
-                    self.leftChild.dim[axis] = divisor
 
-                self.leftChild.calculateVolume()
-                self.leftChild.calculateDeltaV()
-                self.rightChild.lastCut[axis] = divisor
-                
-
-                self.rightChild.calculateVolume()
-                self.rightChild.deltaV = self.deltaV
-
-                depth = depth - 1
-                axis = (axis + 1) % 3
-                
-
-                self.leftChild.split((depth), axis, divCrit)
-                self.rightChild.split((depth), axis, divCrit)
-
-    def split(self, depth, axis, divCrit):
+    def split(self, depth, axis, divCrit, dVMode):
 
         if self.isLeaf:
             if depth > 0:
@@ -196,7 +185,7 @@ class Node():
                 self.leftChild.dim = [int(i) for i in self.dim]
                 self.leftChild.dim[axis] = divisor
                 self.leftChild.calculateVolume()
-                self.leftChild.calculateDeltaV()
+                self.leftChild.deltaV = self.leftChild.calculateDeltaV(dVMode)
                 self.rightChild.lastCut[axis] = divisor
                 self.rightChild.dim = [int(i) for i in self.dim]
                 self.rightChild.calculateVolume()
@@ -206,8 +195,104 @@ class Node():
                 axis = (axis + 1) % 3
                 
 
-                self.leftChild.split((depth), axis, divCrit)
-                self.rightChild.split((depth), axis, divCrit)
+                self.leftChild.split((depth), axis, divCrit, dVMode)
+                self.rightChild.split((depth), axis, divCrit, dVMode)
+
+    def splitByMax(self, depth, axis, divCrit, dVMode):
+
+        if self.isLeaf:
+            if depth > 0:
+                self.leftChild = Node(self)
+                self.leftChild.lastCut = [i for i in self.lastCut]
+                self.rightChild = Node(self)
+                self.rightChild.lastCut = [i for i in self.lastCut]
+                self.isLeaf = False
+                self.leftChild.depth += 1
+                self.rightChild.depth += 1
+                try:
+                    divisor = int(divCrit * (self.getMax(axis) - self.lastCut[axis])) + self.lastCut[axis]
+                except ValueError:
+                    # enter smart error handling here
+                    # only happens when the leaf of interest is empty
+                    divisor = 0
+
+                for point in self.points:
+                    if point.dim[axis] < divisor:
+                        self.leftChild.points.append(point)
+                    else:
+                        self.rightChild.points.append(point)
+                
+                
+                self.leftChild.dim = [int(i) for i in self.dim]
+                self.rightChild.dim = [int(i) for i in self.dim]
+                try:
+                    self.rightChild.dim[axis] = self.rightChild.getMax(axis)
+                    self.rightChild.lastCut[axis] = self.rightChild.getMax(axis)
+                except ValueError:
+                    self.rightChild.dim[axis] = divisor
+                    self.rightChild.lastCut[axis] = divisor
+
+                try:
+                    self.leftChild.dim[axis] = self.leftChild.getMax(axis)
+                except ValueError:
+                    self.leftChild.dim[axis] = divisor
+
+                self.leftChild.calculateVolume()
+                self.leftChild.deltaV = self.leftChild.calculateDeltaV(dVMode)
+                
+                
+
+                self.rightChild.calculateVolume()
+                self.rightChild.deltaV = self.deltaV
+
+                depth = depth - 1
+                axis = (axis + 1) % 3
+                
+
+                self.leftChild.splitByMax((depth), axis, divCrit, dVMode)
+                self.rightChild.splitByMax((depth), axis, divCrit, dVMode)
+
+    def splitRandom(self, depth, axis, dVMode):
+
+        if self.isLeaf:
+            if depth > 0:
+                self.leftChild = Node(self)
+                self.leftChild.lastCut = [i for i in self.lastCut]
+                self.rightChild = Node(self)
+                self.rightChild.lastCut = [i for i in self.lastCut]
+                self.isLeaf = False
+                self.leftChild.depth += 1
+                self.rightChild.depth += 1
+                try:
+                    divCrit = random.choice(range(30,80)) / 100
+                    divisor = int(divCrit * (self.dim[axis] - self.lastCut[axis])) + self.lastCut[axis]
+                except ValueError:
+                    # enter smart error handling here
+                    # only happens when the leaf of interest is empty
+                    divisor = 0
+
+                for point in self.points:
+                    if point.dim[axis] < divisor:
+                        self.leftChild.points.append(point)
+                    else:
+                        self.rightChild.points.append(point)
+                
+                
+                self.leftChild.dim = [int(i) for i in self.dim]
+                self.leftChild.dim[axis] = divisor
+                self.leftChild.calculateVolume()
+                self.leftChild.deltaV = self.leftChild.calculateDeltaV(dVMode)
+                self.rightChild.lastCut[axis] = divisor
+                self.rightChild.dim = [int(i) for i in self.dim]
+                self.rightChild.calculateVolume()
+                self.rightChild.deltaV = self.deltaV
+
+                depth = depth - 1
+                axis = (axis + 1) % 3
+                
+                self.leftChild.splitRandom(depth, axis, dVMode)
+                self.rightChild.splitRandom(depth, axis, dVMode)
+
 
 class TreeControl():
 
@@ -267,6 +352,14 @@ class TreeControl():
                     break
         return
 
+    def optimiseBestNodes(self):
+
+        for n in self.bestNodes:
+            for c in range(0,3):
+                n[0].dim[c] = n[0].getMax(c)
+        print('nodes optimised!')
+        return
+
     # def findLargestNonEmpty(self):
 
     #     largest = [None, None, None]
@@ -293,7 +386,6 @@ class TreeControl():
         assert len(allPoints) == len(self.tree.root.points)
         # print('✔ no points lost!')
         print('no points lost!')
-        print('')
         return
 
     # def getNewItemBoxes(self, path):
@@ -326,13 +418,24 @@ class TreeControl():
                 openFile.write(line)
             
             else:
+
+                # end = self.tree.root
+                # line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
+                # openFile.write(line)
+
+                line68 = 'KARTON 68, 1290, 600, 210,\n'
+                line24 = 'KARTON 24, 1185, 600, 600,\n'
+                openFile.write(line68)
+                openFile.write(line24)
+
+
                 # x = self.bestNodes[-1][0].dim[0]
                 # y = self.bestNodes[-1][0].dim[1]
                 # z = self.bestNodes[-1][0].dim[2]
                 # line = ('KARTON %s,%s,%s,%s,\n') % (n[0].id,x,y,z)
-                end = self.tree.root
-                line = ('KARTON %s,%s,%s,%s,\n') % (end.id,end.dim[0],end.dim[1],end.dim[2])
-                openFile.write(line)
+                # preEnd = self.bestNodes[-1][0]
+                # line = ('KARTON %s,%s,%s,%s,\n') % (preEnd.id,preEnd.dim[0],preEnd.dim[1],preEnd.dim[2])
+                # openFile.write(line)
 
         if plot:
             if plotPath is not None:
@@ -355,7 +458,7 @@ class TreeControl():
         print('Initial total ItemVolume:\t%.4e' % self.initialTotalItemVolume)
         print('Initial total BoxVolume:\t%.4e' % self.initialTotalBoxVolume)
         print('Initial total DeadVolume:\t%.4e' % self.initialTotalDeadVolume)
-        print('Number of Leaves:\t\t\t%s' % len(self.tree.leaves))
+        print('Number of Leaves:\t\t%s' % len(self.tree.leaves))
 
         
         if extended:
@@ -371,10 +474,10 @@ class TreeControl():
                     y = x
                 else:
                     print(n[0],n[1] , " ", end = '')
-            print('')
-            print('Leave Dimensions:')
+            
 
         if leaves:
+            print('Leave Dimensions:')
             for n in self.tree.leaves:
                 print(n.id, n.dim, n.lastCut)
 
