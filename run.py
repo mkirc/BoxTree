@@ -2,11 +2,11 @@ from classes.tree import TreeControl
 
 def run():
 
-    depth = 13
+    depth = 11
     divCrit = 0.5
     startAxis = 0
     MaxNumPoints = None
-    inPath = 'assets/data_old_biggest_01.csv'
+    inPath = 'assets/data_new_biggest_02.csv'
     outPath = 'assets/candidates.csv'
     plotPath = 'assets/plots/best30.jpg'
 
@@ -20,14 +20,18 @@ def run():
     p = [i[0] for i in t.itemBoxes]
     t.tree.insert(p)
 
-    t.tree.grow()
-
-    # sanity check  
+    t.tree.grow(splitMode=0, dVMode=0)  
     t.isNumPointsConst()
 
     t.getBestNodes()
-    t.writeNewBoxesCSV(25, outPath, plot=False, plotPath=plotPath)
+    for i in range(0, 50):
+        try:
+            print(t.bestNodes[i][1], t.bestNodes[i][0].dim)
+        except IndexError:
+            pass
+    t.optimiseBestNodes()
 
+    t.writeNewBoxesCSV(27, outPath, plot=False, plotPath=plotPath)
     t.printInfo(extended=False,leaves=False)
 
 
