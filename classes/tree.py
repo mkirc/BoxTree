@@ -76,6 +76,28 @@ class kdTree():
         for l in self.root.getLeaves():
             self.leaves.append(l)
 
+    def prune(self, num):
+
+        leavesCopy = [n for n in self.leaves]
+        leavesCopy.sort(key=lambda n:n.deltaV)
+
+        for n in leavesCopy:
+
+            if n.deltaV < n.parent.deltaV:
+
+                n.parent.isLeaf = True
+                n.parent.rightChild = None
+                n.parent.leftChild = None
+                
+            
+            self.leaves = []
+            self.getLeaves()
+
+            if len(self.leaves) == num:
+                break
+
+        print(len(self.leaves))
+
     def postOrderWalk(self):
 
         self.root.postOrderWalk()
@@ -121,11 +143,16 @@ class Node():
         if self.isLeaf:
             # print('leave')
             yield self
-        if not self.rightChild and not self.leftChild:
-            pass
+
         else:
-            yield from self.rightChild.getLeaves()
-            yield from self.leftChild.getLeaves()   
+            if self.rightChild and self.leftChild:
+                yield from self.rightChild.getLeaves()
+                yield from self.leftChild.getLeaves()
+            else:
+                pass
+        
+        # if not self.rightChild and not self.leftChild:
+        #     pass
 
     def calculateVolume(self):
 
@@ -236,7 +263,9 @@ class Node():
                         pass
                                 
                 self.leftChild = curLeft
+                self.leftChild.deltaV = self.leftChild.calculateDeltaV(0)
                 self.rightChild = curRight
+                self.rightChild.deltaV = self.deltaV
 
                 depth = depth - 1
                 axis = (axis + 1) % 3
@@ -440,18 +469,23 @@ class TreeControl():
                     break
         return
 
-    def optimiseBestNodes(self, leaves=False):
+    def pruneTree(self, num, tries=3):
 
-        if not leaves:
-            for n in self.bestNodes:
-                for c in range(0,3):
-                    n[0].dim[c] = n[0].getMax(c)
-        else:
-            for n in self.tree.leaves:
-                if len(n.points) > 0:
-                    for c in range(0,3):
-                        n.dim[c] = n.getMax(c)
-                    self.bestNodes.append((n, None))
+        print('pruning...')
+        for t in range(0, tries):
+            print('  try No: %i' % (t))
+            self.tree.prune(num)
+
+            if len(self.tree.leaves) == num:
+                break
+        print('  finished.')
+ 
+
+    def optimiseBestNodes(self):
+
+        for n in self.bestNodes:
+            for c in range(0,3):
+                n[0].dim[c] = n[0].getMax(c)
         print('nodes optimised!')
         return
 
